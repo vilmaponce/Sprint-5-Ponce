@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/styles.css">
+  <title>Registrar País</title>
+</head>
+<body>
+
+  <h1>Agregar Nuevo País</h1>
+
+  <form action="/api/countries" method="POST">
+    <label for="name">Nombre del País</label>
+    <input type="text" id="name" name="name" required>
+  
+    <label for="capital">Capital</label>
+    <input type="text" id="capital" name="capital" required>
+  
+    <label for="area">Área</label>
+    <input type="number" id="area" name="area" required>
+  
+    <label for="population">Población</label>
+    <input type="number" id="population" name="population" required>
+  
+    <label for="languages">Idiomas (separados por comas)</label>
+    <input type="text" id="languages" name="languages" required>
+  
+    <label for="flag">URL de la Bandera</label>
+    <input type="text" id="flag" name="flag" required>
+  
+    <button type="submit">Crear País</button>
+  </form>
+  
+
+  <button onclick="window.location.href='/countries';" style="margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px;">
+    Lista de Países
+  </button>
+
+</body>
+</html>
