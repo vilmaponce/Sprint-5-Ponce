@@ -3,93 +3,142 @@ import { body, param } from 'express-validator';
 
 // Validación para crear un país
 export const crearPaisValidation = [
-  body('name')
-    .notEmpty().withMessage('El nombre del país es obligatorio')
-    .isString().withMessage('El nombre del país debe ser una cadena de texto')
-    .trim()
-    .isLength({ min: 3, max: 100 }).withMessage('El nombre del país debe tener entre 3 y 100 caracteres'),
 
+  // Validación para el nombre del país
+  body('name.official')
+    .notEmpty().withMessage('El nombre oficial del país es obligatorio')
+    .isString().withMessage('El nombre oficial debe ser una cadena de texto')
+    .trim()
+    .isLength({ min: 3, max: 90 }).withMessage('El nombre oficial debe tener entre 3 y 90 caracteres'),
+
+  // Validación para la capital
   body('capital')
     .notEmpty().withMessage('La capital es obligatoria')
-    .isString().withMessage('La capital debe ser una cadena de texto')
-    .trim()
-    .isLength({ min: 3, max: 100 }).withMessage('La capital debe tener entre 3 y 100 caracteres'),
+    .isArray().withMessage('La capital debe ser un array de cadenas de texto')
+    .custom((capitals) => {
+      return capitals.every(capital => typeof capital === 'string' && capital.length >= 3 && capital.length <= 90);
+    }).withMessage('Cada capital debe ser una cadena de texto de entre 3 y 90 caracteres'),
 
+  // Validación para la región
   body('region')
     .notEmpty().withMessage('La región es obligatoria')
     .isString().withMessage('La región debe ser una cadena de texto')
     .trim()
     .isLength({ min: 3, max: 100 }).withMessage('La región debe tener entre 3 y 100 caracteres'),
 
+  // Validación para las fronteras
+  body('borders')
+    .optional()
+    .isArray().withMessage('Las fronteras deben ser un array de códigos de país')
+    .custom((borders) => {
+      return borders.every(border => /^[A-Z]{3}$/.test(border));
+    }).withMessage('Cada código de frontera debe ser una cadena de 3 letras mayúsculas'),
+
+  // Validación para la población
   body('population')
     .notEmpty().withMessage('La población es obligatoria')
     .isInt({ min: 0 }).withMessage('La población debe ser un número entero mayor o igual a 0'),
-  
+
+  // Validación para el área
   body('area')
     .optional()
     .isInt({ min: 1 }).withMessage('El área debe ser un número entero mayor que 0'),
 
+  // Validación para los idiomas
   body('languages')
     .optional()
-    .isObject().withMessage('Languages debe ser un objeto')
+    .isArray().withMessage('Languages debe ser un array')
     .custom((languages) => {
-      return Object.keys(languages).every(key =>
-        typeof key === 'string' && key.trim().length >= 2 && key.trim().length <= 60 &&
-        typeof languages[key] === 'string' && languages[key].trim().length >= 2 && languages[key].trim().length <= 60
+      return languages.every(language =>
+        typeof language === 'string' && language.trim().length >= 2 && language.trim().length <= 60
       );
-    }).withMessage('Cada idioma debe tener un código de idioma válido y un nombre de idioma con entre 2 y 60 caracteres'),
+    }).withMessage('Cada idioma debe ser una cadena de texto válida con entre 2 y 60 caracteres'),
 
+  // Validación para la URL de la bandera
   body('flag')
     .optional()
     .isURL().withMessage('La URL de la bandera debe ser válida'),
+
+  // Validación para el creador
+  body('creator')
+    .notEmpty().withMessage('El creador es obligatorio')
+    .isString().withMessage('El creador debe ser una cadena de texto')
+    .trim()
+    .isLength({ min: 3, max: 100 }).withMessage('El creador debe tener entre 3 y 100 caracteres')
 ];
 
 // Validación para actualizar un país
 export const actualizarPaisValidation = [
-  param('id').isMongoId().withMessage('El ID debe ser un ID de MongoDB válido'),
-
-  body('name')
-    .optional()
-    .notEmpty().withMessage('El nombre del país no puede estar vacío')
-    .isString().withMessage('El nombre del país debe ser una cadena de texto')
+  // Validación para el nombre oficial
+  body('name.official')
+    .optional() // Ahora es opcional en la actualización
+    .isString().withMessage('El nombre oficial debe ser una cadena de texto')
     .trim()
-    .isLength({ min: 3, max: 100 }).withMessage('El nombre del país debe tener entre 3 y 100 caracteres'),
+    .isLength({ min: 3, max: 90 }).withMessage('El nombre oficial debe tener entre 3 y 90 caracteres'),
 
+  // Validación para el nombre común
+  body('name.common')
+    .optional()
+    .isString().withMessage('El nombre común debe ser una cadena de texto')
+    .trim()
+    .isLength({ min: 3, max: 100 }).withMessage('El nombre común debe tener entre 3 y 100 caracteres'),
+
+  // Validación para la capital
   body('capital')
     .optional()
-    .notEmpty().withMessage('La capital no puede estar vacía')
-    .isString().withMessage('La capital debe ser una cadena de texto')
-    .trim()
-    .isLength({ min: 3, max: 100 }).withMessage('La capital debe tener entre 3 y 100 caracteres'),
+    .isArray().withMessage('La capital debe ser un array de cadenas de texto')
+    .custom((capitals) => {
+      return capitals.every(capital => typeof capital === 'string' && capital.length >= 3 && capital.length <= 90);
+    }).withMessage('Cada capital debe ser una cadena de texto de entre 3 y 90 caracteres'),
 
+  // Validación para la región
   body('region')
     .optional()
-    .notEmpty().withMessage('La región no puede estar vacía')
     .isString().withMessage('La región debe ser una cadena de texto')
     .trim()
     .isLength({ min: 3, max: 100 }).withMessage('La región debe tener entre 3 y 100 caracteres'),
 
+  // Validación para las fronteras
+  body('borders')
+    .optional()
+    .isArray().withMessage('Las fronteras deben ser un array de códigos de país')
+    .custom((borders) => {
+      return borders.every(border => /^[A-Z]{3}$/.test(border));
+    }).withMessage('Cada código de frontera debe ser una cadena de 3 letras mayúsculas'),
+
+  // Validación para la población
   body('population')
     .optional()
     .isInt({ min: 0 }).withMessage('La población debe ser un número entero mayor o igual a 0'),
 
+  // Validación para el área
   body('area')
     .optional()
     .isInt({ min: 1 }).withMessage('El área debe ser un número entero mayor que 0'),
 
+  // Validación para los idiomas
   body('languages')
     .optional()
-    .isArray().withMessage('Los idiomas deben ser un arreglo')
-    .custom((languages) => languages.every(language =>
-      typeof language === 'string' &&
-      language.trim().length >= 2 &&
-      language.trim().length <= 60
-    )).withMessage('Cada idioma debe ser una cadena de texto sin espacios en blanco y tener entre 2 y 60 caracteres'),
+    .isArray().withMessage('Languages debe ser un array')
+    .custom((languages) => {
+      return languages.every(language =>
+        typeof language === 'string' && language.trim().length >= 2 && language.trim().length <= 60
+      );
+    }).withMessage('Cada idioma debe ser una cadena de texto válida con entre 2 y 60 caracteres'),
 
+  // Validación para la URL de la bandera
   body('flag')
     .optional()
     .isURL().withMessage('La URL de la bandera debe ser válida'),
+
+  // Validación para el creador
+  body('creator')
+    .optional()
+    .isString().withMessage('El creador debe ser una cadena de texto')
+    .trim()
+    .isLength({ min: 3, max: 100 }).withMessage('El creador debe tener entre 3 y 100 caracteres')
 ];
+
 
 // Validación para eliminar un país
 export const eliminarPaisValidation = [

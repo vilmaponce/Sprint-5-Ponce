@@ -1,37 +1,42 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/styles.css">
   <title>Editar País</title>
 </head>
+
 <body>
+  <h1>Editar País</h1>
 
-  <h1>Editar País: <%= country.name %></h1>
+  <form action="/edit-country/<%= country._id %>" method="POST">
+    <label for="nameCommon">Nombre Común</label>
+    <input type="text" id="nameCommon" name="name.common" value="<%= country.name.common %>" required minlength="3" maxlength="90">
 
-  <form action="/api/countries/{{country._id}}" method="POST">
-    <label for="name">Nombre del País</label>
-    <input type="text" id="name" name="name" value="{{country.name.common}}" required>
-  
     <label for="capital">Capital</label>
-    <input type="text" id="capital" name="capital" value="{{country.capital}}" required>
-  
-    <label for="area">Área</label>
-    <input type="number" id="area" name="area" value="{{country.area}}" required>
-  
+    <input type="text" id="capital" name="capital" value="<%= country.capital.join(', ') %>" required>
+
+    <label for="area">Área (km²)</label>
+    <input type="number" id="area" name="area" value="<%= country.area %>" required>
+
     <label for="population">Población</label>
-    <input type="number" id="population" name="population" value="{{country.population}}" required>
-  
-    <label for="languages">Idiomas (separados por comas)</label>
-    <input type="text" id="languages" name="languages" value="{{country.languages}}" required>
-  
-    <label for="flag">URL de la Bandera</label>
-    <input type="text" id="flag" name="flag" value="{{country.flag}}" required>
-  
-    <button type="submit">Actualizar País</button>
+    <input type="number" id="population" name="population" value="<%= country.population %>" required>
+
+    <label for="languages">Idiomas</label>
+    <input type="text" id="languages" name="languages" value="<%= Object.values(country.languages).join(', ') %>" required>
+
+    <label for="creator">Creador</label>
+    <input type="text" id="creator" name="creator" value="<%= country.creator %>" required>
+
+    <button type="submit">Guardar Cambios</button>
   </form>
-  
+
+  <a href="/">Volver a la lista de países</a>
+
+</body>
+
+</html>
 
 </body>
 </html>

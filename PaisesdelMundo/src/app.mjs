@@ -34,9 +34,11 @@ app.use(expressLayouts);
 app.set('layout', 'layout');
 
 
-// Middleware para procesar datos del formulario
-app.use(bodyParser.urlencoded({ extended: true })); // Formularios
-app.use(express.json()); // JSON adicional
+// Middleware para procesar datos JSON y formularios
+app.use(express.json()); // Para manejar solicitudes JSON
+app.use(bodyParser.urlencoded({ extended: true })); // Para manejar formularios
+
+
 
 // Middleware para establecer 'title' de manera global
 app.use((req, res, next) => {
@@ -48,6 +50,7 @@ app.use((req, res, next) => {
 app.get('/', async (req, res) => {
   try {
     const countries = await Country.find();
+    console.log(countries); // Esto te permitirá ver qué datos se están pasando a la vista
     res.render('index', {
       title: 'Lista de Países',
       countries: countries
@@ -58,20 +61,47 @@ app.get('/', async (req, res) => {
   }
 });
 
+
 // Mostrar formulario para añadir un país
 app.get('/add-country', (req, res) => {
   res.render('form');  // Este formulario se puede reutilizar o adaptar para países
 });
 
 // POST para crear un nuevo país
-// POST para crear un nuevo país
-app.post('/countries', [
-  body('name').notEmpty().withMessage('El nombre es obligatorio'),
-  body('capital').notEmpty().withMessage('La capital es obligatoria'),
-  body('area').isFloat({ min: 0 }).withMessage('El área debe ser un número positivo'),
-  body('population').isInt({ min: 1 }).withMessage('La población debe ser un número entero positivo'),
-  body('languages').isArray().withMessage('Los idiomas deben ser una lista'),
-  body('flag').notEmpty().withMessage('La URL de la bandera es obligatoria')  // Validación de la bandera
+app.post('/add-country', [
+  body('name.official')
+    .notEmpty().withMessage('El nombre oficial es obligatorio')
+    .isString().withMessage('El nombre oficial debe ser una cadena de texto')
+    .trim()
+    .isLength({ min: 3, max: 90 }).withMessage('El nombre oficial debe tener entre 3 y 90 caracteres'),
+
+  body('capital')
+    .notEmpty().withMessage('La capital es obligatoria')
+    .isArray().withMessage('La capital debe ser un array de cadenas de texto')
+    .custom((capitals) => {
+      return capitals.every(capital => typeof capital === 'string' && capital.length >= 3 && capital.length <= 90);
+    }).withMessage('Cada capital debe tener entre 3 y 90 caracteres'),
+
+  body('area')
+    .isInt({ min: 1 }).withMessage('El área debe ser un número entero positivo mayor que 0'),
+
+  body('population')
+    .isInt({ min: 1 }).withMessage('La población debe ser un número entero positivo'),
+
+  body('languages')
+    .isArray().withMessage('Los idiomas deben ser un array')
+    .custom((languages) => {
+      return languages.every(language =>
+        typeof language === 'string' && language.trim().length >= 2 && language.trim().length <= 60
+      );
+    }).withMessage('Cada idioma debe ser una cadena de texto válida con entre 2 y 60 caracteres'),
+
+  body('creator')
+    .notEmpty().withMessage('El creador es obligatorio')
+    .isString().withMessage('El creador debe ser una cadena de texto')
+    .trim()
+    .isLength({ min: 3, max: 100 }).withMessage('El creador debe tener entre 3 y 100 caracteres')
+
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -82,20 +112,27 @@ app.post('/countries', [
     // Convierte el campo 'languages' en un arreglo si es una cadena
     const languages = req.body.languages ? req.body.languages.split(',') : [];
 
-     // Obtiene la URL de la bandera
-    const flag = req.body.flag;
+    // Obtiene la URL de la bandera
+    const flag = req.body.flag || ''; // Deberías agregar validación para asegurarte de que sea una URL válida si es necesario
+
+    // Asignar el nombre del creador desde el cuerpo de la solicitud
+    const creator = req.body.creator || "Vilma Ponce"; // Usa el nombre del creador si está en la solicitud, sino asigna un valor predeterminado
 
     const newCountry = new Country({
-      name: req.body.name,
+      name: {
+        official: req.body.name.official,  // Usamos name.official en lugar de solo name
+      },
       capital: req.body.capital,
       area: req.body.area,
       population: req.body.population,
-      languages: languages,  // Aquí usas el arreglo 'languages'
-      flag: flag  // Guardamos la URL de la bandera
+      languages: languages,
+      creator: creator,
+      flag: flag,  // Aquí agregamos la bandera
+      borders: req.body.borders || [], // Asegúrate de manejar la propiedad 'borders' si la recibes
     });
 
     await newCountry.save();
-    res.redirect('/countries');
+    res.redirect('/add-country');
   } catch (error) {
     res.status(500).send('Error al crear el país');
   }
@@ -141,8 +178,8 @@ app.put('/countries/editar/:id', async (req, res) => {
       capital,
       area,
       population,
-      languages,
-      flag
+      languages
+      
     }, { new: true });
 
     if (!updatedCountry) {

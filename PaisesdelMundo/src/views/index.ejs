@@ -1,29 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
+  <title>
+    <%= title %>
+  </title>
 </head>
+
 <body>
   <h1>Lista de Países</h1>
-  
+
   <ul>
     <% countries.forEach(country => { %>
       <li>
         <h2><%= country.name.common %></h2>
-        <p>Capital: <%= country.capital %></p>
+        <p>Capital: <%= country.capital.join(', ') %></p>
         <p>Área: <%= country.area %> km²</p>
         <p>Población: <%= country.population %></p>
         <p>Idiomas: <%= country.languages ? Object.values(country.languages).join(', ') : 'No disponibles' %></p>
-        <img src="<%= country.flag %>" alt="Flag of <%= country.name.common %>" width="50">
+        <p>Bandera:
+          <% if (country.flag && country.flag.includes('http')) { %>
+            <img src="<%= country.flag %>" alt="Bandera de <%= country.name.common %>" style="width: 50px; height: auto;">
+          <% } else { %>
+            <%= country.flag %> <!-- Esto mostrará el emoji de la bandera si es un emoji -->
+          <% } %>
+        </p>
+        <p>Creator: <%= country.creator %></p>
+
+        <!-- Botones de Edición y Eliminación -->
+        <div>
+          <a href="/edit-country/<%= country._id %>" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
+          
+          <!-- Botón de eliminar (Formulario) -->
+          <form action="/delete-country/<%= country._id %>" method="POST" style="display: inline-block;">
+            <button type="submit" style="padding: 5px 10px; background-color: #ff4d4d; color: white; border: none; border-radius: 5px;">Eliminar</button>
+          </form>
+        </div>
 
       </li>
     <% }) %>
   </ul>
 
-  <a href="/add-country">Agregar un nuevo país</a>
+  <!-- Enlace para agregar un nuevo país -->
+  <a href="/add-country" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; display: block;">Agregar un nuevo país</a>
+
 </body>
+
 </html>
-
-
