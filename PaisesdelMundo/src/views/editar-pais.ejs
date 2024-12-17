@@ -4,18 +4,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/style.css">
   <title>Editar País</title>
 </head>
 
 <body>
   <h1>Editar País</h1>
 
-  <form action="/edit-country/<%= country._id %>" method="POST">
+  <form id="edit-form" action="/api/countries/<%= country._id %>?_method=PUT" method="POST">
+    <input type="hidden" name="_method" value="PUT">
+
     <label for="nameCommon">Nombre Común</label>
-    <input type="text" id="nameCommon" name="name.common" value="<%= country.name.common %>" required minlength="3" maxlength="90">
+    <input type="text" id="nameCommon" name="name.common" value="<%= country.name.common %>" required minlength="3"
+      maxlength="90">
 
     <label for="capital">Capital</label>
-    <input type="text" id="capital" name="capital" value="<%= country.capital.join(', ') %>" required>
+    <input type="text" id="capital" name="capital[]" value="Marteville" required>
 
     <label for="area">Área (km²)</label>
     <input type="number" id="area" name="area" value="<%= country.area %>" required>
@@ -24,19 +28,17 @@
     <input type="number" id="population" name="population" value="<%= country.population %>" required>
 
     <label for="languages">Idiomas</label>
-    <input type="text" id="languages" name="languages" value="<%= Object.values(country.languages).join(', ') %>" required>
+    <input type="text" id="languages" name="languages[]" value="Solano" required>
 
     <label for="creator">Creador</label>
     <input type="text" id="creator" name="creator" value="<%= country.creator %>" required>
 
-    <button type="submit">Guardar Cambios</button>
+    <button type="submit">Actualizar Pais</button>
   </form>
 
-  <a href="/">Volver a la lista de países</a>
+  <a href="/api/countries">Volver a la lista de países</a>
 
+  <script src="/js/validarEdicion"></script>
 </body>
 
-</html>
-
-</body>
 </html>

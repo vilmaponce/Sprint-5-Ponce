@@ -22,9 +22,13 @@
 </head>
 <body>
     <header>
+      <!-- Incluir el Navbar -->
+        <%- include('partials/navbar') %>
         <h1><%= title %></h1>
     </header>
 
     <%- body %> <!-- Aquí se incluirán las vistas renderizadas -->
+    <!-- Incluir el Footer -->
+    <%- include('partials/footer') %>
 </body>
 </html>

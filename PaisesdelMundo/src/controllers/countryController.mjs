@@ -238,7 +238,9 @@ export async function actualizarPaisController(req, res) {
     // Desestructuración de los datos de la solicitud
     const { nameOfficial, nameCommon, capital, region, borders, population, area, languages, flag, creator } = req.body;
 
-    // Actualizar el país con los nuevos datos
+  
+
+    // Si todo es válido, se actualizan los datos del país
     country.name.official = nameOfficial || country.name.official;
     country.name.common = nameCommon || country.name.common;
     country.capital = capital || country.capital;

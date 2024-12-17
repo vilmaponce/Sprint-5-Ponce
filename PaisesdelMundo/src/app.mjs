@@ -1,4 +1,5 @@
 import express from 'express';
+import methodOverride from 'method-override';
 import fs from 'fs';
 import path from 'path';
 import bodyParser from 'body-parser';
@@ -13,12 +14,17 @@ import { body, validationResult } from 'express-validator';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+// Usa el middleware de method-override
+app.use(methodOverride('_method'));
+
+
 // Obtener __dirname en un módulo ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.resolve('./public')));
 
 
 // Conexión a la base de datos
@@ -26,7 +32,7 @@ connectDB();
 
 // Configurar EJS como motor de plantillas
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.resolve('./views'));
 
 
 // Configurar express-ejs-layouts
@@ -50,7 +56,7 @@ app.use((req, res, next) => {
 app.get('/', async (req, res) => {
   try {
     const countries = await Country.find();
-    console.log(countries); // Esto te permitirá ver qué datos se están pasando a la vista
+    console.log(countries); // Verifica que estos datos se están pasando correctamente
     res.render('index', {
       title: 'Lista de Países',
       countries: countries
@@ -62,9 +68,10 @@ app.get('/', async (req, res) => {
 });
 
 
+
 // Mostrar formulario para añadir un país
 app.get('/add-country', (req, res) => {
-  res.render('form');  // Este formulario se puede reutilizar o adaptar para países
+   res.render('form', { country: null });  // Este formulario se puede reutilizar o adaptar para países
 });
 
 // POST para crear un nuevo país
@@ -139,7 +146,6 @@ app.post('/add-country', [
 });
 
 
-
 // Ruta para editar un país
 app.get('/countries/editar/:id', async (req, res) => {
   const { id } = req.params;
@@ -154,6 +160,8 @@ app.get('/countries/editar/:id', async (req, res) => {
       return res.status(404).send('País no encontrado');
     }
 
+    country.languages = country.languages || [];
+
     res.render('editar-pais', { country });
   } catch (err) {
     console.error('Error al obtener el país:', err);
@@ -161,10 +169,39 @@ app.get('/countries/editar/:id', async (req, res) => {
   }
 });
 
+// Ruta POST/PUT para actualizar un país
+app.post('/countries/editar/:id', async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).send('ID de país no válido');
+  }
+
+  try {
+    const { nameCommon, capital, languages } = req.body;
+
+    const country = await Country.findByIdAndUpdate(id, {
+      nameCommon,
+      capital,
+      languages
+    });
+
+    if (!country) {
+      return res.status(404).send('País no encontrado');
+    }
+
+    res.redirect('/countries'); // Redirige a la lista de países
+  } catch (err) {
+    console.error('Error al actualizar el país:', err);
+    res.status(500).send('Error al actualizar los datos del país');
+  }
+});
+
+
 // Ruta para actualizar un país
 app.put('/countries/editar/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, capital, area, population, languages, flag } = req.body;
+  const { name, capital, area, population, languages } = req.body;
 
   // Verificar si hay errores de validación
   const errors = validationResult(req);
@@ -190,6 +227,7 @@ app.put('/countries/editar/:id', async (req, res) => {
   } catch (error) {
     res.status(500).send('Error al actualizar el país');
   }
+  
 });
 
 // Ruta para eliminar un país

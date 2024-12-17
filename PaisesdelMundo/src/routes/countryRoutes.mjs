@@ -17,16 +17,30 @@ import { validationHandler } from '../validators/validationHandler.mjs';
 
 const router = express.Router();
 
-/* Rutas para obtener información */
+//Esto significa que cualquier ruta definida en countryRoutes será accesible bajo el prefijo /api/countries. Por ejemplo:
+
+//GET /api/countries/ → Llama a obtenerTodosLosPaisesController.
+//GET /api/countries/:id → Llama a obtenerPaisPorIdController.
+//POST /api/countries/add-country → Llama a crearPaisController.
+//La línea router.post('/add-country', ...) se combina con /api/countries.
+
+
 // Rutas para obtener información
-router.get('/', obtenerTodosLosPaisesController);  // Cambié '/countries' por '/'
-router.get('/:id', obtenerPaisPorIdController);  // Cambié '/countries/:id' por '/:id'
-router.get('/search/:atributo/:valor', buscarPaisesPorAtributoController);  // Cambié '/countries/search/:atributo/:valor' por '/search/:atributo/:valor'
-router.get('/edit/:id', mostrarFormularioDeEdicion);  // Cambié '/countries/edit/:id' por '/edit/:id'
+router.get('/', obtenerTodosLosPaisesController); 
+router.get('/:id', obtenerPaisPorIdController);  
+router.get('/search/:atributo/:valor', buscarPaisesPorAtributoController);  
+router.get('/:id/edit', mostrarFormularioDeEdicion);  
 
+//RUTA POST--->Ruta creacion de pais 
+router.post('/add-country', crearPaisValidation, validationHandler, crearPaisController); 
 
-router.post('/add-country', crearPaisValidation, validationHandler, crearPaisController);  // Cambié '/countries' por '/'
-router.put('/:id', actualizarPaisValidation, validationHandler, actualizarPaisController);  // Cambié '/countries/:id' por '/:id'
-router.delete('/:id', eliminarPaisValidation, validationHandler, eliminarPaisController);  // Cambié '/countries/:id' por '/:id'
+// Ruta POST ---> Para editar país desde el formulario (usando method-override para PUT)
+router.post('/editar/:id', actualizarPaisController);
+
+//RUTA PUT ----> Ruta para actualizacion de un pais
+router.put('/:id', actualizarPaisValidation, validationHandler, actualizarPaisController);
+
+//RUTA DELETE  
+router.delete('/:id', eliminarPaisValidation, validationHandler, eliminarPaisController);  
 
 export default router;

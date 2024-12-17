@@ -10,7 +10,6 @@
 </head>
 
 <body>
-  <h1>Lista de Países</h1>
 
   <ul>
     <% countries.forEach(country => { %>
@@ -31,7 +30,7 @@
 
         <!-- Botones de Edición y Eliminación -->
         <div>
-          <a href="/edit-country/<%= country._id %>" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
+          <a href="/countries/editar/<%= country._id %>" class="btn btn-primary"" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
           
           <!-- Botón de eliminar (Formulario) -->
           <form action="/delete-country/<%= country._id %>" method="POST" style="display: inline-block;">
@@ -45,6 +44,11 @@
 
   <!-- Enlace para agregar un nuevo país -->
   <a href="/add-country" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; display: block;">Agregar un nuevo país</a>
+
+  <!-- Aquí se mostrarán los datos actualizados después de la edición -->
+  <div id="display-container" style="margin-top: 20px; padding: 10px; border: 1px solid #007bff;">
+    <!-- Los datos actualizados aparecerán aquí -->
+  </div>
 
 </body>
 

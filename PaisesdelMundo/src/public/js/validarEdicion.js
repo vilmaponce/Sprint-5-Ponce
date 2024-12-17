@@ -1,68 +1,42 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        // Función de validación para texto
-        const validateText = (value, minLength, maxLength) => {
-            const trimmedValue = value.trim();
-            return trimmedValue.length >= minLength && trimmedValue.length <= maxLength;
-        };
-        
-        // Función de validación para arrays (separados por coma)
-        const validateArray = (value, minLength, maxLength) => {
-            const items = value.split(',')
-                .map(item => item.trim())
-                .filter(item => item !== ''); // Elimina los vacíos
-            
-            return items.length > 0 && 
-                   items.every(item => item.length >= minLength && item.length <= maxLength);
-        };
-        
-        // Obtener los valores del formulario
-        const name = document.getElementById('name').value;
-        const capital = document.getElementById('capital').value;
-        const area = document.getElementById('area').value;
-        const population = document.getElementById('population').value;
-        const languages = document.getElementById('languages').value;
-        const flag = document.getElementById('flag').value;
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#edit-form'); // Asegúrate de tener un formulario con este id
 
-        const errors = [];
-        
-        // Validar nombre del país
-        if (!validateText(name, 3, 60)) {
-            errors.push('El nombre del país debe tener entre 3 y 60 caracteres');
-        }
-        
-        // Validar capital
-        if (!validateText(capital, 3, 60)) {
-            errors.push('La capital debe tener entre 3 y 60 caracteres');
-        }
-        
-        // Validar área
-        if (!area || parseInt(area) <= 0) {
-            errors.push('El área debe ser un número mayor a 0');
-        }
-        
-        // Validar población
-        if (!population || parseInt(population) <= 0) {
-            errors.push('La población debe ser un número mayor a 0');
-        }
-        
-        // Validar idiomas
-        if (!validateArray(languages, 2, 60)) {
-            errors.push('Los idiomas deben tener entre 2 y 60 caracteres');
-        }
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del formulario
 
-        // Mostrar errores
-        if (errors.length > 0) {
-            alert('Por favor, corrija los siguientes errores:\n' + errors.join('\n'));
-            return; // Detener el envío del formulario si hay errores
-        }
+            const formData = new FormData(form);
 
-        // Si todas las validaciones pasan, enviar el formulario
-        form.submit();
-    });
+            fetch(form.action, {
+                method: 'PUT',
+                body: formData,
+            })
+            .then(response => response.json()) // Convertir la respuesta a JSON
+            .then(data => {
+                if (data.mensaje) {
+                    // Si la actualización es exitosa, mostramos el mensaje y los datos actualizados
+                    const displayContainer = document.querySelector('#display-container');
+                    displayContainer.innerHTML = `
+                        <h2>Actualización exitosa: ${data.mensaje}</h2>
+                        <h3>Detalles del país actualizado:</h3>
+                        <p><strong>Nombre común:</strong> ${data.country.name.common}</p>
+                        <p><strong>Nombre oficial:</strong> ${data.country.name.official}</p>
+                        <p><strong>Capital:</strong> ${data.country.capital.join(', ')}</p>
+                        <p><strong>Región:</strong> ${data.country.region}</p>
+                        <p><strong>Población:</strong> ${data.country.population}</p>
+                        <p><strong>Área:</strong> ${data.country.area} km²</p>
+                        <p><strong>Idiomas:</strong> ${data.country.languages.join(', ')}</p>
+                        <p><strong>Creator:</strong> ${data.country.creator}</p>
+                        <p><strong>Banderas:</strong> ${data.country.flag ? `<img src="${data.country.flag}" alt="Bandera de ${data.country.name.common}" style="width: 50px; height: auto;">` : 'No disponible'}</p>
+                    `;
+                } else if (data.errors) {
+                    alert("Error al actualizar el país. Por favor revisa los campos.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Hubo un problema al intentar actualizar el país.");
+            });
+        });
+    }
 });
-

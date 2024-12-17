@@ -10,41 +10,33 @@
 
 <h1>Editar País</h1>
 
-<form action="/edit-country/<%= country._id %>" method="POST">
+<!-- form.ejs -->
+<form id="edit-form" action="/api/countries/add-country" method="POST">
   <label for="nameCommon">Nombre Común</label>
-  <input type="text" id="nameCommon" name="name.common" value="<%= country.name.common %>" required minlength="3" maxlength="90">
+  <input type="text" id="nameCommon" name="name.common" value="<%= country ? country.name.common : '' %>" required minlength="3" maxlength="90">
 
   <label for="nameOfficial">Nombre Oficial</label>
-  <input type="text" id="nameOfficial" name="name.official" value="<%= country.name.official %>" required minlength="3" maxlength="90">
+  <input type="text" id="nameOfficial" name="name.official" value="<%= country ? country.name.official : '' %>" required minlength="3" maxlength="90">
 
-  <label for="capital">Capital (separadas por coma, si hay más de una)</label>
-  <input type="text" id="capital" name="capital" value="<%= country.capital.join(', ') %>" required minlength="3" maxlength="90">
+  <label for="capital">Capital</label>
+  <input type="text" id="capital" name="capital" value="<%= country ? country.capital : '' %>" required>
 
-  <label for="borders">Fronteras (Códigos de País, Ejemplo: ARG, BRA)</label>
-  <input type="text" id="borders" name="borders" value="<%= country.borders.join(', ') %>" required pattern="([A-Z]{3},)*[A-Z]{3}">
-
-  <label for="area">Área (en km²)</label>
-  <input type="number" id="area" name="area" value="<%= country.area %>" required min="0">
+  <label for="area">Área</label>
+  <input type="number" id="area" name="area" value="<%= country ? country.area : '' %>" required>
 
   <label for="population">Población</label>
-  <input type="number" id="population" name="population" value="<%= country.population %>" required min="1">
+  <input type="number" id="population" name="population" value="<%= country ? country.population : '' %>" required>
 
-  <label for="gini">Índice Gini</label>
-  <input type="number" id="gini" name="gini" value="<%= country.gini %>" required min="0" max="100">
+  <label for="languages">Idiomas</label>
+  <input type="text" id="languages" name="languages" value="<%= country ? country.languages.join(', ') : '' %>" required>
 
-  <label for="languages">Idiomas (separados por coma, si hay más de uno)</label>
-  <input type="text" id="languages" name="languages" value="<%= country.languages.join(', ') %>" required>
-
-  <label for="creator">Creador</label>
-  <input type="text" id="creator" name="creator" value="<%= country.creator %>" required minlength="3" maxlength="100">
-
-  <button type="submit">Actualizar País</button>
+  <button type="submit"><%= country ? 'Actualizar' : 'Agregar' %> País</button>
 </form>
 
 <button onclick="window.location.href='/api/countries';" style="margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px;">
   Lista de Países
 </button>
-
+  <script src="/js/validarEdicion"></script>
 </body>
 </html>
 
