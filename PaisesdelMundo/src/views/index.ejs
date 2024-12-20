@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/styles.css">
   <title>
     <%= title %>
   </title>
@@ -33,9 +34,12 @@
           <a href="/countries/editar/<%= country._id %>" class="btn btn-primary"" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
           
           <!-- Botón de eliminar (Formulario) -->
-          <form action="/delete-country/<%= country._id %>" method="POST" style="display: inline-block;">
+          <form action="/api/countries/<%= country._id %>" method="POST" style="display: inline-block;">
+            <input type="hidden" name="_method" value="DELETE">
             <button type="submit" style="padding: 5px 10px; background-color: #ff4d4d; color: white; border: none; border-radius: 5px;">Eliminar</button>
           </form>
+          
+          
         </div>
 
       </li>
@@ -43,7 +47,7 @@
   </ul>
 
   <!-- Enlace para agregar un nuevo país -->
-  <a href="/add-country" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; display: block;">Agregar un nuevo país</a>
+  <a href="/add-country" style="padding: 10px 10px;width:200px; background-color: #245118; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; display: block;">Agregar un nuevo país</a>
 
   <!-- Aquí se mostrarán los datos actualizados después de la edición -->
   <div id="display-container" style="margin-top: 20px; padding: 10px; border: 1px solid #007bff;">

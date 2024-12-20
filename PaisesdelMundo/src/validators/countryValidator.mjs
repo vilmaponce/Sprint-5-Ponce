@@ -71,17 +71,10 @@ export const crearPaisValidation = [
 export const actualizarPaisValidation = [
   // Validación para el nombre oficial
   body('name.official')
-    .optional() // Ahora es opcional en la actualización
+    .not().isEmpty().withMessage('El nombre oficial del país es obligatorio')
     .isString().withMessage('El nombre oficial debe ser una cadena de texto')
     .trim()
     .isLength({ min: 3, max: 90 }).withMessage('El nombre oficial debe tener entre 3 y 90 caracteres'),
-
-  // Validación para el nombre común
-  body('name.common')
-    .optional()
-    .isString().withMessage('El nombre común debe ser una cadena de texto')
-    .trim()
-    .isLength({ min: 3, max: 100 }).withMessage('El nombre común debe tener entre 3 y 100 caracteres'),
 
   // Validación para la capital
   body('capital')

@@ -1,42 +1,93 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('#edit-form'); // Asegúrate de tener un formulario con este id
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("edit-form");
 
-    if (form) {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevenir el comportamiento predeterminado del formulario
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-            const formData = new FormData(form);
+        // Collect form data
+        const formData = new FormData(form);
+        const datos = {};
 
-            fetch(form.action, {
-                method: 'PUT',
-                body: formData,
-            })
-            .then(response => response.json()) // Convertir la respuesta a JSON
-            .then(data => {
-                if (data.mensaje) {
-                    // Si la actualización es exitosa, mostramos el mensaje y los datos actualizados
-                    const displayContainer = document.querySelector('#display-container');
-                    displayContainer.innerHTML = `
-                        <h2>Actualización exitosa: ${data.mensaje}</h2>
-                        <h3>Detalles del país actualizado:</h3>
-                        <p><strong>Nombre común:</strong> ${data.country.name.common}</p>
-                        <p><strong>Nombre oficial:</strong> ${data.country.name.official}</p>
-                        <p><strong>Capital:</strong> ${data.country.capital.join(', ')}</p>
-                        <p><strong>Región:</strong> ${data.country.region}</p>
-                        <p><strong>Población:</strong> ${data.country.population}</p>
-                        <p><strong>Área:</strong> ${data.country.area} km²</p>
-                        <p><strong>Idiomas:</strong> ${data.country.languages.join(', ')}</p>
-                        <p><strong>Creator:</strong> ${data.country.creator}</p>
-                        <p><strong>Banderas:</strong> ${data.country.flag ? `<img src="${data.country.flag}" alt="Bandera de ${data.country.name.common}" style="width: 50px; height: auto;">` : 'No disponible'}</p>
-                    `;
-                } else if (data.errors) {
-                    alert("Error al actualizar el país. Por favor revisa los campos.");
+        // Convert FormData to structured object
+        formData.forEach((value, key) => {
+            if (key.includes('.')) {
+                const [parent, child] = key.split('.');
+                if (!datos[parent]) datos[parent] = {};
+                datos[parent][child] = value;
+            }
+            else if (key.endsWith('[]')) {
+                const baseKey = key.slice(0, -2);
+                datos[baseKey] = value.split(',').map(item => item.trim());
+            }
+            else if (key !== '_method') {
+                datos[key] = value;
+            }
+        });
+
+        // Determine method (PUT for update)
+        const method = formData.get('_method') || 'PUT';
+
+        // Get the country ID from the form action
+        const countryId = form.action.split('/').pop();
+
+        // Log debugging information
+        console.log('Sending update request:', {
+            url: `/api/countries/editar/${countryId}`,
+            method: method,
+            data: datos
+        });
+
+        // Fetch configuration
+        fetch(`/api/countries/${countryId}`, {
+            method: 'PUT',
+            body: JSON.stringify(datos),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    // Try to get more error details
+                    return response.text().then(text => {
+                        throw new Error(`Server responded with ${response.status}: ${text}`);
+                    });
                 }
+                return response.json();
+            })
+            .then(data => {
+                console.log('País actualizado:', data);
+                window.location.href = '/api/countries';
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("Hubo un problema al intentar actualizar el país.");
+                console.error('Error completo al actualizar el país:', error);
+                alert(`Error al actualizar el país: ${error.message}`);
             });
+    });
+
+    // Real-time validation
+    const inputs = form.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('input', function () {
+            // Remove previous error states
+            this.classList.remove('error');
+            const existingError = this.nextSibling;
+            if (existingError && existingError.classList.contains('error-message')) {
+                existingError.remove();
+            }
+
+            // Validate specific fields
+            if (this.hasAttribute('minlength')) {
+                const minLength = parseInt(this.getAttribute('minlength'));
+                if (this.value.trim().length < minLength) {
+                    this.classList.add('error');
+                    const errorMsg = document.createElement('div');
+                    errorMsg.textContent = `Debe tener al menos ${minLength} caracteres`;
+                    errorMsg.classList.add('error-message');
+                    this.parentNode.insertBefore(errorMsg, this.nextSibling);
+                }
+            }
         });
-    }
+    });
 });

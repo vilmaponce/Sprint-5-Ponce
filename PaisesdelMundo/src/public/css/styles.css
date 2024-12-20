@@ -17,19 +17,21 @@ body {
     padding: 20px;
 }
 
-/* Navbar */
 nav {
     background-color: #007BFF;
     padding: 15px;
     display: flex;
-    justify-content: space-between;
+    justify-content:space-around; /* Centra el contenido del nav */
     align-items: center;
-    text-align: center;
     position: fixed;
-    width: 100%;
     top: 0;
+    left: 0; /* Asegura que esté pegado al borde izquierdo */
+    width: 100%;
     z-index: 10;
+    margin: 0;
 }
+
+
 
 nav a {
     color: white;
@@ -228,4 +230,14 @@ footer .social-icons a {
 footer .social-icons a:hover {
     color: #ff4500;
     transform: scale(1.2);
+}
+
+input.error {
+    border: 2px solid red;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.8em;
+    margin-top: 5px;
 }

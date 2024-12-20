@@ -87,7 +87,7 @@ const countrySchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  collection: 'Grupo-01' // Nombre explícito de la colección
+  collection: 'Grupo-20' // Nombre explícito de la colección
 });
 
 export default mongoose.model('Country', countrySchema);

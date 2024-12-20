@@ -5,7 +5,7 @@ import Country from '../models/Country.mjs'; // Ajusta la ruta según tu estruct
 // Conexión a MongoDB
 const connectToDB = async () => {
   try {
-    await mongoose.connect('mongodb+srv://grupo-01:grupo01@cursadanodejs.ls9ii.mongodb.net/Node-js', {
+    await mongoose.connect('mongodb+srv://Grupo-20:grupo20@cursadanodejs.ls9ii.mongodb.net/Node-js', {
       
     });
     console.log('Conectado a MongoDB');
@@ -64,7 +64,8 @@ const importCountries = async () => {
       subregion: country.subregion || 'Desconocido',
       population: country.population || 0,
       area: country.area || 0,
-      languages: country.languages || {},
+      // Extraer los idiomas como un array de cadenas
+      languages: country.languages ? Object.values(country.languages) : [],
       flag: country.flags?.svg || '',
       creator: 'Vilma Ponce',
     }));
@@ -77,6 +78,7 @@ const importCountries = async () => {
     mongoose.connection.close(); // Cierra la conexión
   }
 };
+
 
 // Ejecutar el script
 const run = async () => {

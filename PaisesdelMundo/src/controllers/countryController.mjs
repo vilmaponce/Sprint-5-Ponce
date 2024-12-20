@@ -35,9 +35,10 @@ export const fetchCountries = async () => {
           subregion: country.subregion || 'No especificado',
           population: country.population || 0,
           area: country.area || 0,
-          languages: country.languages || {}, // Mantener el Map de idiomas
+          languages: country.languages ? Object.keys(country.languages) : [],
           flag: country.flags ? country.flags.png : '',
           creator: 'Vilma Ponce',
+          gini: country.gini || 0,
         };
 
         // Verificar si el país ya existe en la base de datos
@@ -62,10 +63,17 @@ export const fetchCountries = async () => {
 
 export async function obtenerTodosLosPaisesController(req, res) {
   try {
+    // Buscar todos los países que ya están en la base de datos
     let countries = await Country.find({ "name.common": { $exists: true } }).lean();
 
+    // Actualizar países que no tienen el campo 'creator'
+    await Country.updateMany(
+      { creator: { $exists: false } },  // Solo actualiza los países que no tienen 'creator'
+      { $set: { creator: 'Vilma Ponce' } }  // Asigna tu nombre como creador
+    );
+    console.log("Se han actualizado los países sin 'creator'.");
+
     if (countries.length === 0) {
-      // Solo hacer la consulta a la API si no hay países en la base de datos
       console.log('No se encontraron países en la base de datos, se recuperan de la API...');
       const response = await axios.get('https://restcountries.com/v3.1/all');
       
@@ -75,27 +83,28 @@ export async function obtenerTodosLosPaisesController(req, res) {
           country.flags = { png: '/img/flag.png' }; // Establecer una bandera predeterminada si no existe
         }
 
-        // Asegurarte de que solo se guarda la URL de la bandera
-        return {
+        // Asegurarse de que solo se guarda la URL de la bandera
+        const newCountry = {
           ...country,
-          flag: country.flags.png || '/img/flag.png' // Asegurar que la bandera tenga una URL válida
+          flag: country.flags.png || '/img/flag.png', // Asegurar que la bandera tenga una URL válida
+          creator: 'Vilma Ponce'  // Asignar el creador al país al momento de la inserción
         };
+
+        return newCountry;
       });
 
+      // Insertar los países recuperados de la API
       await Country.insertMany(countries);
       console.log("Se han insertado países desde la API externa.");
     }
 
-    console.log('Países encontrados:', countries.length);
-    console.log('Primer país:', countries[0]);
-
+    // Renderizar la vista con la lista de países
     res.render('index', { 
       countries,
       mensaje: `Se encontraron ${countries.length} países` 
     });
   } catch (error) {
     console.error("Error al obtener países:", error);
-
     res.status(500).render('error', { 
       mensaje: "Error interno del servidor. No se pudo obtener la información de los países.",
       error: error.message 
@@ -104,13 +113,11 @@ export async function obtenerTodosLosPaisesController(req, res) {
 }
 
 
-
-
-
 // Función para obtener un país por su ID
 export async function obtenerPaisPorIdController(req, res) {
   const { id } = req.params;
-
+  console.log(`Buscando país con ID: ${id}`);
+  
   // Verifica si el ID es válido
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).send({ mensaje: "ID de país no válido" });
@@ -120,10 +127,13 @@ export async function obtenerPaisPorIdController(req, res) {
     // Busca el país por ID
     const country = await Country.findById(id);
 
-    // Si no se encuentra el país
+    // Verifica si se encontró el país
     if (!country) {
       return res.status(404).send({ mensaje: "País no encontrado" });
     }
+
+    // Si el país es encontrado, se muestra la información del país
+    console.log('País encontrado:', country);
 
     // Si el país es encontrado, se envía como respuesta
     res.json(country);
@@ -132,6 +142,7 @@ export async function obtenerPaisPorIdController(req, res) {
     res.status(500).send({ mensaje: "Error interno del servidor" });
   }
 }
+
 
 
 // Controlador para buscar países por un atributo específico
@@ -169,6 +180,8 @@ export async function crearPaisController(req, res) {
   // Desestructuración de los datos de la solicitud
   const { name: { official, common }, capital, region, borders, population, area, languages, flag, creator } = req.body;
 
+  console.log("Creator:", creator); // Para verificar que se está pasando correctamente
+
   const newCountry = new Country({
     name: {
       official, // Asignar directamente desde la desestructuración
@@ -181,7 +194,7 @@ export async function crearPaisController(req, res) {
     area,
     languages,
     flag,
-    creator,
+    creator
   });
 
   try {
@@ -286,7 +299,6 @@ export async function mostrarFormularioDeEdicion(req, res) {
 
 
 
-
 export const eliminarPaisController = async (req, res) => {
   const { id } = req.params;
 
@@ -303,3 +315,4 @@ export const eliminarPaisController = async (req, res) => {
     return res.status(500).json({ message: 'Error al eliminar el país', error });
   }
 };
+

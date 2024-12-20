@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export async function connectDB() { 
     try {
-        await mongoose.connect('mongodb+srv://grupo-01:grupo01@cursadanodejs.ls9ii.mongodb.net/Node-js', {
+        await mongoose.connect('mongodb+srv://Grupo-20:grupo20@cursadanodejs.ls9ii.mongodb.net/Node-js', {
             serverSelectionTimeoutMS: 5000
           });
           

@@ -12,7 +12,6 @@
   <meta name="keywords" content="listado,crear,actualizar,eliminar">
   <meta name="author" content="Vilma Ponce">
   <!-- zona del favicon -->
-  <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -20,15 +19,19 @@
     rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body>
-    <header>
-      <!-- Incluir el Navbar -->
-        <%- include('partials/navbar') %>
-        <h1><%= title %></h1>
-    </header>
 
-    <%- body %> <!-- Aquí se incluirán las vistas renderizadas -->
+<body>
+  <header>
+    <!-- Incluir el Navbar -->
+    <%- include('partials/navbar') %>
+      <h1>
+        <%= title %>
+      </h1>
+  </header>
+
+  <%- body %> <!-- Aquí se incluirán las vistas renderizadas -->
     <!-- Incluir el Footer -->
     <%- include('partials/footer') %>
 </body>
+
 </html>
