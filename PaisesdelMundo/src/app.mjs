@@ -248,11 +248,13 @@ app.post('/countries/editar/:id', async (req, res) => {
 
   
     const { nameCommon, capital, languages } = req.body;
-      console.log(req.body);  // Verifica el contenido de la solicitud
+      console.log(req.body);
+        // Verifica el contenido de la solicitud
     const country = await Country.findByIdAndUpdate(id, {
       nameCommon,
       capital,
-      languages
+      languages,
+      creator
     });
 
     if (!country) {
@@ -270,7 +272,7 @@ app.post('/countries/editar/:id', async (req, res) => {
 // Ruta para actualizar un país
 app.put('/countries/editar/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, capital, area, population, languages, region } = req.body;
+  const { name, capital, area, population, languages, region, creator } = req.body;
 
   // Verificar si hay errores de validación
   const errors = validationResult(req);
@@ -285,7 +287,8 @@ app.put('/countries/editar/:id', async (req, res) => {
       area,
       population,
       languages,
-      region
+      region,
+      creator 
       
     }, { new: true });
 

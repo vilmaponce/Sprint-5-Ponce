@@ -71,7 +71,7 @@ export async function obtenerTodosLosPaisesController(req, res) {
       { creator: { $exists: false } },  // Solo actualiza los países que no tienen 'creator'
       { $set: { creator: 'Vilma Ponce' } }  // Asigna tu nombre como creador
     );
-    console.log("Se han actualizado los países sin 'creator'.");
+    console.log("Se han actualizado los países ");
 
     if (countries.length === 0) {
       console.log('No se encontraron países en la base de datos, se recuperan de la API...');

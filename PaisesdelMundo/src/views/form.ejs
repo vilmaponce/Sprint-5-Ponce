@@ -16,70 +16,130 @@
     <%= country ? 'Editar País' : 'Agregar País' %>
   </h1>
 
-  <form action="/add-country" method="POST" id="countryForm">
+  <form action="/add-country" method="POST" id="countryForm" onsubmit="return validarFormulario(event)">
     <% if (country) { %>
       <input type="hidden" name="_method" value="PUT">
-      <% } %>
-
-        <!-- Nombre Común -->
-        <div>
-          <label for="nameCommon">Nombre Común</label>
-          <input type="text" id="nameCommon" name="name[common]" value="<%= country ? country.name.common : '' %>"
-            required minlength="3" maxlength="90">
-        </div>
-
-        <!-- Nombre Oficial -->
-        <div>
-          <label for="nameOfficial">Nombre Oficial</label>
-          <input type="text" id="nameOfficial" name="name[official]" value="<%= country ? country.name.official : '' %>"
-            required minlength="3" maxlength="90">
-        </div>
-
-        <!-- Capital -->
-        <div>
-          <label for="capital">Capital (separadas por coma)</label>
-          <input type="text" id="capital" name="capital" placeholder="Ej: Ciudad1, Ciudad2"
-            value="<%= country ? country.capital.join(', ') : '' %>" required>
-        </div>
-
-        <!-- Área -->
-        <div>
-          <label for="area">Área (km²)</label>
-          <input type="number" id="area" name="area" value="<%= country ? country.area : '' %>" required min="1">
-        </div>
-
-        <!-- Región -->
-        <div>
-          <label for="region">Región</label>
-          <input type="text" id="region" name="region" value="<%= country ? country.region : '' %>" required
-            minlength="3" maxlength="100">
-        </div>
-
-        <!-- Población -->
-        <div>
-          <label for="population">Población</label>
-          <input type="number" id="population" name="population" value="<%= country ? country.population : '' %>"
-            required min="1">
-        </div>
-
-        <!-- Idiomas -->
-        <div>
-          <label for="languages">Idiomas (separados por coma)</label>
-          <input type="text" id="languages" name="languages" placeholder="Ej: Español, Inglés"
-            value="<%= country ? country.languages.join(', ') : '' %>" required>
-        </div>
-
-        <!-- Creador -->
-        <div>
-          <label for="creator">Creador</label>
-          <input type="text" id="creator" name="creator" value="<%= country ? country.creator : '' %>" required
-            minlength="3" maxlength="100">
-        </div>
-
-        <button type="submit">
-          <%= country ? 'Actualizar' : 'Agregar' %> País
-        </button>
+    <% } %>
+  
+    <div class="form-group">
+      <label for="nameCommon">Nombre Común</label>
+      <input type="text" 
+             id="nameCommon" 
+             name="name[common]" 
+             value="<%= country ? country.name.common : '' %>"
+             required 
+             minlength="3" 
+             maxlength="90"
+             pattern="^[a-zA-ZÀ-ÿ\s]+$"
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="nameCommon-error"></div>
+    </div>
+  
+    <div class="form-group">
+      <label for="nameOfficial">Nombre Oficial</label>
+      <input type="text" 
+             id="nameOfficial" 
+             name="name[official]" 
+             value="<%= country ? country.name.official : '' %>"
+             required 
+             minlength="3" 
+             maxlength="90"
+             pattern="^[a-zA-ZÀ-ÿ\s]+$"
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="nameOfficial-error"></div>
+    </div>
+  
+    <div class="form-group">
+      <label for="capital">Capital (separadas por coma)</label>
+      <input type="text" 
+             id="capital" 
+             name="capital" 
+             value="<%= country ? country.capital.join(', ') : '' %>"
+             placeholder="Ej: Ciudad1, Ciudad2"
+             required
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="capital-error"></div>
+    </div>
+  
+    <div class="form-group">
+      <label for="area">Área (km²)</label>
+      <input type="number" 
+             id="area" 
+             name="area" 
+             value="<%= country ? country.area : '' %>"
+             required
+             min="1"
+             step="0.01"
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="area-error"></div>
+    </div>
+  
+    <div class="form-group">
+      <label for="region">Región</label>
+      <input type="text" 
+             id="region" 
+             name="region" 
+             value="<%= country ? country.region : '' %>"
+             required
+             minlength="3" 
+             maxlength="100"
+             pattern="^[a-zA-ZÀ-ÿ\s]+$"
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="region-error"></div>
+    </div>
+  
+    <div class="form-group">
+      <label for="population">Población</label>
+      <input type="number" 
+             id="population" 
+             name="population" 
+             value="<%= country ? country.population : '' %>"
+             required
+             min="1"
+             step="1"
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="population-error"></div>
+    </div>
+  
+    <div class="form-group">
+      <label for="languages">Idiomas (separados por coma)</label>
+      <input type="text" 
+             id="languages" 
+             name="languages" 
+             value="<%= country ? country.languages.join(', ') : '' %>"
+             placeholder="Ej: Español, Inglés"
+             required
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="languages-error"></div>
+    </div>
+  
+    <div class="form-group">
+      <label for="creator">Creador</label>
+      <input type="text" 
+             id="creator" 
+             name="creator" 
+             value="<%= country ? country.creator : '' %>"
+             required
+             minlength="3"
+             maxlength="100"
+             pattern="^[a-zA-ZÀ-ÿ\s]+$"
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="creator-error"></div>
+    </div>
+  
+    <button type="submit" class="btn btn-primary">
+      <%= country ? 'Actualizar' : 'Agregar' %> País
+    </button>
   </form>
+  
 
   <button onclick="window.location.href='/api/countries';">
     Lista de Países
@@ -89,3 +149,179 @@
 </body>
 
 </html>
+
+<style>
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-control {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+  }
+  
+  .form-control.is-invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+  }
+  
+  .error-message {
+    display: none;
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+  }
+  
+  .error-message.active {
+    display: block;
+  }
+  
+  .btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+  }
+  
+  .btn-primary {
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  </style>
+  
+  <script>
+  function validarCampo(input) {
+    const errorDiv = document.getElementById(`${input.id}-error`);
+    let esValido = true;
+    let mensajeError = '';
+  
+    // Limpiar estados previos
+    input.classList.remove('is-invalid');
+    errorDiv.classList.remove('active');
+  
+    const valor = input.value.trim();
+  
+    // Validación común para campos requeridos
+    if (input.required && !valor) {
+      esValido = false;
+      mensajeError = 'Este campo es obligatorio';
+    } else {
+      switch (input.id) {
+        case 'nameCommon':
+        case 'nameOfficial':
+          if (valor.length < 3 || valor.length > 90) {
+            esValido = false;
+            mensajeError = 'Debe tener entre 3 y 90 caracteres';
+          } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
+            esValido = false;
+            mensajeError = 'Solo se permiten letras y espacios';
+          }
+          break;
+  
+        case 'capital':
+          const capitales = valor.split(',').map(c => c.trim());
+          if (!capitales.every(c => c.length >= 3 && c.length <= 90 && /^[a-zA-ZÀ-ÿ\s]+$/.test(c))) {
+            esValido = false;
+            mensajeError = 'Cada capital debe tener entre 3 y 90 caracteres y solo contener letras y espacios';
+          }
+          break;
+  
+        case 'area':
+          const area = parseFloat(valor);
+          if (isNaN(area) || area < 1) {
+            esValido = false;
+            mensajeError = 'Debe ser un número mayor que 0';
+          }
+          break;
+  
+        case 'region':
+          if (valor.length < 3 || valor.length > 100) {
+            esValido = false;
+            mensajeError = 'Debe tener entre 3 y 100 caracteres';
+          } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
+            esValido = false;
+            mensajeError = 'Solo se permiten letras y espacios';
+          }
+          break;
+  
+        case 'population':
+          const population = parseInt(valor);
+          if (isNaN(population) || population < 1) {
+            esValido = false;
+            mensajeError = 'Debe ser un número entero mayor que 0';
+          }
+          break;
+  
+        case 'languages':
+          const idiomas = valor.split(',').map(i => i.trim());
+          if (!idiomas.every(i => i.length >= 3 && i.length <= 60 && /^[a-zA-ZÀ-ÿ\s]+$/.test(i))) {
+            esValido = false;
+            mensajeError = 'Cada idioma debe tener entre 3 y 60 caracteres y solo contener letras y espacios';
+          }
+          break;
+  
+        case 'creator':
+          if (valor.length < 3 || valor.length > 100) {
+            esValido = false;
+            mensajeError = 'Debe tener entre 3 y 100 caracteres';
+          } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
+            esValido = false;
+            mensajeError = 'Solo se permiten letras y espacios';
+          }
+          break;
+      }
+    }
+  
+    if (!esValido) {
+      input.classList.add('is-invalid');
+      errorDiv.textContent = mensajeError;
+      errorDiv.classList.add('active');
+    }
+  
+    return esValido;
+  }
+  
+  function validarFormulario(event) {
+    const form = event.target;
+    const inputs = form.querySelectorAll('input[required]');
+    let formValido = true;
+  
+    inputs.forEach(input => {
+      if (!validarCampo(input)) {
+        formValido = false;
+      }
+    });
+  
+    if (!formValido) {
+      event.preventDefault();
+    }
+  
+    return formValido;
+  }
+  
+  // Agregar validación en tiempo real
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('countryForm');
+    const inputs = form.querySelectorAll('input');
+  
+    inputs.forEach(input => {
+      input.addEventListener('input', () => validarCampo(input));
+      input.addEventListener('blur', () => validarCampo(input));
+    });
+  });
+  </script>
+  
