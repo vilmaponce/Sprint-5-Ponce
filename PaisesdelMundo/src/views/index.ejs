@@ -33,12 +33,9 @@
         <div>
           <a href="/countries/editar/<%= country._id %>" class="btn btn-primary"" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
           
-          <!-- Botón de eliminar (Formulario) -->
-          <form action="/api/countries/<%= country._id %>" method="POST" style="display: inline-block;">
-            <input type="hidden" name="_method" value="DELETE">
+          <form onsubmit="deleteCountry(event, '<%= country._id %>')" style="display: inline-block;">
             <button type="submit" style="padding: 5px 10px; background-color: #ff4d4d; color: white; border: none; border-radius: 5px;">Eliminar</button>
           </form>
-          
           
         </div>
 
@@ -57,3 +54,27 @@
 </body>
 
 </html>
+
+
+<script>
+  async function deleteCountry(event, id) {
+    event.preventDefault();
+    
+    if (confirm('¿Estás seguro de que quieres eliminar este país?')) {
+      try {
+        const response = await fetch(`/api/countries/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert('Error al eliminar el país');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar el país');
+      }
+    }
+  }
+  </script>
