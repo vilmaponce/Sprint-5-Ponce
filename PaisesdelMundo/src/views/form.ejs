@@ -119,6 +119,49 @@
              class="form-control">
       <div class="error-message" id="languages-error"></div>
     </div>
+    <!-- Nuevos campos -->
+
+    <div class="form-group">
+      <label for="borders">Fronteras (separadas por coma)</label>
+      <input type="text" 
+             id="borders" 
+             name="borders" 
+             value="<%= country ? country.borders.join(', ') : '' %>"
+             placeholder="Ej: ABC, DEF"
+             required
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="borders-error"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="gini">Índice de Gini</label>
+      <input type="number" 
+             id="gini" 
+             name="gini" 
+             value="<%= country ? country.gini : '' %>"
+             required
+             min="0"
+             max="100"
+             step="0.01"
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="gini-error"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="timezones">Zona Horaria</label>
+      <input type="text" 
+             id="timezones" 
+             name="timezones" 
+             value="<%= country ? country.timezones : '' %>"
+             required placeholder="Ejemplo: America/New_York, Europe/Madrid"
+             onkeyup="validarCampo(this)"
+             class="form-control">
+      <div class="error-message" id="timezones-error"></div>
+    </div>
+    
+
   
     <div class="form-group">
       <label for="creator">Creador</label>
@@ -135,9 +178,12 @@
       <div class="error-message" id="creator-error"></div>
     </div>
   
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary" id="submitBtn">
       <%= country ? 'Actualizar' : 'Agregar' %> País
     </button>
+
+    <!-- Mensaje de éxito que se muestra después de agregar el país -->
+    <div id="successMessage" style="display: none; color: green;">¡País agregado con éxito!</div>
   </form>
   
 
@@ -203,125 +249,172 @@
   }
   </style>
   
+
   <script>
-  function validarCampo(input) {
-    const errorDiv = document.getElementById(`${input.id}-error`);
-    let esValido = true;
-    let mensajeError = '';
+    // Función para validar un campo individual
+    function validarCampo(input) {
+      const errorDiv = document.getElementById(`${input.id}-error`);
+      let esValido = true;
+      let mensajeError = '';
   
-    // Limpiar estados previos
-    input.classList.remove('is-invalid');
-    errorDiv.classList.remove('active');
+      // Limpiar estados previos
+      input.classList.remove('is-invalid');
+      errorDiv.classList.remove('active');
   
-    const valor = input.value.trim();
+      const valor = input.value.trim();
   
-    // Validación común para campos requeridos
-    if (input.required && !valor) {
-      esValido = false;
-      mensajeError = 'Este campo es obligatorio';
-    } else {
-      switch (input.id) {
-        case 'nameCommon':
-        case 'nameOfficial':
-          if (valor.length < 3 || valor.length > 90) {
-            esValido = false;
-            mensajeError = 'Debe tener entre 3 y 90 caracteres';
-          } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
-            esValido = false;
-            mensajeError = 'Solo se permiten letras y espacios';
-          }
-          break;
+      // Validación para campos requeridos
+      if (input.required && !valor) {
+        esValido = false;
+        mensajeError = 'Este campo es obligatorio';
+      } else {
+        switch (input.id) {
+          case 'nameCommon':
+          case 'nameOfficial':
+            if (valor.length < 3 || valor.length > 90) {
+              esValido = false;
+              mensajeError = 'Debe tener entre 3 y 90 caracteres';
+            } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
+              esValido = false;
+              mensajeError = 'Solo se permiten letras y espacios';
+            }
+            break;
   
-        case 'capital':
-          const capitales = valor.split(',').map(c => c.trim());
-          if (!capitales.every(c => c.length >= 3 && c.length <= 90 && /^[a-zA-ZÀ-ÿ\s]+$/.test(c))) {
-            esValido = false;
-            mensajeError = 'Cada capital debe tener entre 3 y 90 caracteres y solo contener letras y espacios';
-          }
-          break;
+          case 'capital':
+            const capitales = valor.split(',').map(c => c.trim());
+            if (!capitales.every(c => c.length >= 3 && c.length <= 90 && /^[a-zA-ZÀ-ÿ\s]+$/.test(c))) {
+              esValido = false;
+              mensajeError = 'Cada capital debe tener entre 3 y 90 caracteres y solo contener letras y espacios';
+            }
+            break;
   
-        case 'area':
-          const area = parseFloat(valor);
-          if (isNaN(area) || area < 1) {
-            esValido = false;
-            mensajeError = 'Debe ser un número mayor que 0';
-          }
-          break;
+          case 'area':
+            const area = parseFloat(valor);
+            if (isNaN(area) || area < 1) {
+              esValido = false;
+              mensajeError = 'Debe ser un número mayor que 0';
+            }
+            break;
   
-        case 'region':
-          if (valor.length < 3 || valor.length > 100) {
-            esValido = false;
-            mensajeError = 'Debe tener entre 3 y 100 caracteres';
-          } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
-            esValido = false;
-            mensajeError = 'Solo se permiten letras y espacios';
-          }
-          break;
+          case 'region':
+            if (valor.length < 3 || valor.length > 100) {
+              esValido = false;
+              mensajeError = 'Debe tener entre 3 y 100 caracteres';
+            } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
+              esValido = false;
+              mensajeError = 'Solo se permiten letras y espacios';
+            }
+            break;
   
-        case 'population':
-          const population = parseInt(valor);
-          if (isNaN(population) || population < 1) {
-            esValido = false;
-            mensajeError = 'Debe ser un número entero mayor que 0';
-          }
-          break;
+          case 'population':
+            const population = parseInt(valor);
+            if (isNaN(population) || population < 1) {
+              esValido = false;
+              mensajeError = 'Debe ser un número entero mayor que 0';
+            }
+            break;
   
-        case 'languages':
-          const idiomas = valor.split(',').map(i => i.trim());
-          if (!idiomas.every(i => i.length >= 3 && i.length <= 60 && /^[a-zA-ZÀ-ÿ\s]+$/.test(i))) {
-            esValido = false;
-            mensajeError = 'Cada idioma debe tener entre 3 y 60 caracteres y solo contener letras y espacios';
-          }
-          break;
+          case 'languages':
+            const idiomas = valor.split(',').map(i => i.trim());
+            if (!idiomas.every(i => i.length >= 3 && i.length <= 60 && /^[a-zA-ZÀ-ÿ\s]+$/.test(i))) {
+              esValido = false;
+              mensajeError = 'Cada idioma debe tener entre 3 y 60 caracteres y solo contener letras y espacios';
+            }
+            break;
   
-        case 'creator':
-          if (valor.length < 3 || valor.length > 100) {
-            esValido = false;
-            mensajeError = 'Debe tener entre 3 y 100 caracteres';
-          } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
-            esValido = false;
-            mensajeError = 'Solo se permiten letras y espacios';
-          }
-          break;
+          case 'gini':
+            const gini = parseFloat(valor);
+            if (isNaN(gini) || gini < 0 || gini > 100) {
+              esValido = false;
+              mensajeError = 'Debe ser un número entre 0 y 100';
+            }
+            break;
+  
+          case 'timezones':
+            const timezoneRegex = /^[A-Za-z]+\/[A-Za-z_]+$/;
+            if (!timezoneRegex.test(valor)) {
+              esValido = false;
+              mensajeError = 'Formato de zona horaria no válido. Ejemplo: America/New_York.';
+            }
+            break;
+  
+          case 'borders':
+            const borders = valor.split(',').map(b => b.trim());
+            if (!borders.every(b => b.length >= 3 && /^[a-zA-ZÀ-ÿ\s]+$/.test(b))) {
+              esValido = false;
+              mensajeError = 'Cada frontera debe tener entre 3 y 90 caracteres y solo contener letras y espacios';
+            }
+            break;
+  
+          case 'creator':
+            if (valor.length < 3 || valor.length > 100) {
+              esValido = false;
+              mensajeError = 'Debe tener entre 3 y 100 caracteres';
+            } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(valor)) {
+              esValido = false;
+              mensajeError = 'Solo se permiten letras y espacios';
+            }
+            break;
+        }
+      }
+  
+      // Si el campo no es válido, mostrar error
+      if (!esValido) {
+        input.classList.add('is-invalid');
+        errorDiv.textContent = mensajeError;
+        errorDiv.classList.add('active');
+      }
+  
+      return esValido;
+    }
+  
+    // Función para validar todo el formulario
+    function validarFormulario(event) {
+      event.preventDefault();  // Prevenir el envío del formulario para manejarlo manualmente
+  
+      const form = event.target;
+      const inputs = form.querySelectorAll('input[required]');
+      let formValido = true;
+  
+      // Validar todos los campos
+      inputs.forEach(input => {
+        if (!validarCampo(input)) {
+          formValido = false;
+        }
+      });
+  
+      if (formValido) {
+        // Deshabilitar el botón para evitar clics múltiples
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Agregando...'; // Cambiar el texto del botón a "Agregando..."
+  
+        // Simulando el proceso de agregar país
+        setTimeout(() => {
+          // Mostrar mensaje de éxito
+          document.getElementById('successMessage').style.display = 'block';
+          
+          // Limpiar el formulario (opcional)
+          form.reset();
+  
+          // Habilitar nuevamente el botón después de un tiempo
+          submitBtn.disabled = false;
+          submitBtn.textContent = '<%= country ? "Actualizar" : "Agregar" %> País';  // Volver a su texto original
+        }, 1500); // Simula un retardo de 1.5 segundos (puedes ajustarlo según sea necesario)
       }
     }
   
-    if (!esValido) {
-      input.classList.add('is-invalid');
-      errorDiv.textContent = mensajeError;
-      errorDiv.classList.add('active');
-    }
+    // Agregar validación en tiempo real
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('countryForm');
+      const inputs = form.querySelectorAll('input');
   
-    return esValido;
-  }
+      inputs.forEach(input => {
+        input.addEventListener('input', () => validarCampo(input));
+        input.addEventListener('blur', () => validarCampo(input));
+      });
   
-  function validarFormulario(event) {
-    const form = event.target;
-    const inputs = form.querySelectorAll('input[required]');
-    let formValido = true;
-  
-    inputs.forEach(input => {
-      if (!validarCampo(input)) {
-        formValido = false;
-      }
+      form.addEventListener('submit', validarFormulario);
     });
-  
-    if (!formValido) {
-      event.preventDefault();
-    }
-  
-    return formValido;
-  }
-  
-  // Agregar validación en tiempo real
-  document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('countryForm');
-    const inputs = form.querySelectorAll('input');
-  
-    inputs.forEach(input => {
-      input.addEventListener('input', () => validarCampo(input));
-      input.addEventListener('blur', () => validarCampo(input));
-    });
-  });
   </script>
   

@@ -54,7 +54,7 @@ const countrySchema = new mongoose.Schema({
     type: [String], // Esto es un array de cadenas
     required: [true, "Los idiomas son obligatorios."],
     validate: {
-      validator: function(value) {
+      validator: function (value) {
         return value.every(lang => typeof lang === 'string' && lang.length >= 2 && lang.length <= 60);
       },
       message: "Cada idioma debe ser una cadena de texto válida con entre 2 y 60 caracteres."
@@ -69,13 +69,25 @@ const countrySchema = new mongoose.Schema({
   },
   gini: {
     type: Number,
-    min: [0, "El índice Gini debe ser al menos 0."],
-    max: [100, "El índice Gini no puede exceder 100."],
+    min: [0, "El índice Gini no puede ser menor que 0."],
+    max: [100, "El índice Gini no puede ser mayor que 100."],
+    default: null // Define un valor predeterminado
+  },
+
+  timezones: {
+    type: [String],
+    required: [true, 'Las zonas horarias son obligatorias'],
     validate: {
-      validator: (value) => value >= 0 && value <= 100,
-      message: "El índice Gini debe estar entre 0 y 100."
+      validator: function (value) {
+        console.log("Datos antes de la validación:", value);
+        return Array.isArray(value) && value.every(tz => /^[A-Za-z]+\/[A-Za-z0-9_\-]+$/.test(tz));
+      },
+      message: 'Cada zona horaria debe ser una cadena de texto válida, como "America/New_York".'
     }
   },
+  
+  
+
   creator: {
     type: String,
     required: [true, "El creador es obligatorio."],

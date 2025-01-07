@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import Country from '../models/Country.mjs'; // El modelo de país
 import { validationResult } from 'express-validator';
 
-// Función que consume la API de países y guarda los países en la base de datos
+
 // Función que consume la API de países y guarda los países en la base de datos
 export const fetchCountries = async () => {
   try {
@@ -25,6 +25,22 @@ export const fetchCountries = async () => {
     // Preparar los países para insertarlos en la base de datos
     for (const country of spanishSpeakingCountries) {
       try {
+        // Redondear el valor de Gini si es un decimal
+        let gini = country.gini ? Math.round(country.gini) : 0;
+
+        // Asegurarse de que el valor de Gini esté entre 0 y 100
+        if (gini < 0) gini = 0;
+        if (gini > 100) gini = 100;
+
+        // Asegurarse de guardar todas las zonas horarias que tiene el país
+        const timezones = country.timezones && country.timezones.length > 0 ? country.timezones : ['No especificado'];
+
+        // Validación de que las zonas horarias tengan el formato correcto
+        const validTimezones = timezones.every(tz => /^[A-Za-z]+\/[A-Za-z_]+$/.test(tz));
+        if (!validTimezones) {
+          console.error(`Zonas horarias inválidas para ${country.name.common}`);
+        }
+        // Guardar el país en la base de datos
         const newCountry = {
           name: {
             common: country.name.common || 'No especificado',
@@ -39,6 +55,7 @@ export const fetchCountries = async () => {
           flag: country.flags ? country.flags.png : '',
           creator: 'Vilma Ponce',
           gini: country.gini || 0,
+          timezones: country.timezones ? country.timezones[0] : 'No especificado',
         };
 
         // Verificar si el país ya existe en la base de datos
@@ -83,11 +100,25 @@ export async function obtenerTodosLosPaisesController(req, res) {
           country.flags = { png: '/img/flag.png' }; // Establecer una bandera predeterminada si no existe
         }
 
+        const timezones = country.timezones && country.timezones.length > 0 ? country.timezones : ['No especificado'];
+        const gini = country.gini ? Math.round(country.gini) : 0;
         // Asegurarse de que solo se guarda la URL de la bandera
         const newCountry = {
-          ...country,
-          flag: country.flags.png || '/img/flag.png', // Asegurar que la bandera tenga una URL válida
-          creator: 'Vilma Ponce'  // Asignar el creador al país al momento de la inserción
+          name: {
+            common: country.name.common || 'No especificado',
+            official: country.name.official || 'No especificado',
+          },
+          capital: country.capital ? country.capital[0] : 'No especificado',
+          region: country.region || 'No especificado',
+          subregion: country.subregion || 'No especificado',
+          population: country.population || 0,
+          area: country.area || 0,
+          languages: country.languages ? Object.keys(country.languages) : [],
+          flag: country.flags.png || '/img/flag.png',
+          creator: 'Vilma Ponce',  // Asegurar que siempre tenga un creador
+          gini: gini,
+          timezones: timezones,
+        
         };
 
         return newCountry;
@@ -178,7 +209,8 @@ export async function crearPaisController(req, res) {
   }
 
   // Desestructuración de los datos de la solicitud
-  const { name: { official, common }, capital, region, borders, population, area, languages, flag, creator } = req.body;
+  const { name: { official, common }, capital, region, borders, population, area, languages, flag, creator,  gini, 
+  timezones} = req.body;
 
   console.log("Creator:", creator); // Para verificar que se está pasando correctamente
 
@@ -194,7 +226,9 @@ export async function crearPaisController(req, res) {
     area,
     languages,
     flag,
-    creator
+    creator,
+    gini: gini || 'No especificado',
+    timezones: timezones || []
   });
 
   try {
@@ -249,7 +283,8 @@ export async function actualizarPaisController(req, res) {
     }
 
     // Desestructuración de los datos de la solicitud
-    const { nameOfficial, nameCommon, capital, region, borders, population, area, languages, flag, creator } = req.body;
+    const { nameOfficial, nameCommon, capital, region, borders, population, area, languages, flag, creator, 
+      gini, timezones  } = req.body;
 
   
 
@@ -264,7 +299,9 @@ export async function actualizarPaisController(req, res) {
     country.languages = languages || country.languages;
     country.flag = flag || country.flag;
     country.creator = creator || country.creator;
-
+    country.gini = gini || country.gini || 0; // Si no se proporciona, se mantiene el valor actual o se establece 0
+    country.timezones = timezones || country.timezones || [];
+    
     // Guardar los cambios
     const updatedCountry = await country.save();
     res.status(200).json({ mensaje: "País actualizado exitosamente", country: updatedCountry });

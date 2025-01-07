@@ -77,13 +77,61 @@ app.get('/', async (req, res) => {
 
 // Mostrar formulario para añadir un país
 app.get('/add-country', (req, res) => {
-   res.render('form', { country: null });  // Este formulario se puede reutilizar o adaptar para países
+  res.render('form', { country: null });  // Este formulario se puede reutilizar o adaptar para países
 });
 
+app.use((req, res, next) => {
+  if (req.body.timezones && typeof req.body.timezones === 'string') {
+    req.body.timezones = req.body.timezones.split(',').map(tz => tz.trim());
+  }
+  next();
+});
+
+
+// Mapeo entre las zonas horarias UTC y las zonas horarias estándar IANA
+const utcToTimezonesMap = {
+  'UTC-12:00': 'Pacific/Kwajalein',
+  'UTC-11:00': 'Pacific/Midway',
+  'UTC-10:00': 'Pacific/Honolulu',
+  'UTC-09:00': 'America/Anchorage',
+  'UTC-08:00': 'America/Los_Angeles',
+  'UTC-07:00': 'America/Denver',
+  'UTC-06:00': 'America/Chicago',
+  'UTC-05:00': 'America/New_York',
+  'UTC-04:00': 'America/Houston',
+  'UTC-03:00': 'America/Argentina/Buenos_Aires',
+  'UTC-02:00': 'America/Noronha',
+  'UTC-01:00': 'Atlantic/Azores',
+  'UTC+00:00': 'Europe/London',
+  'UTC+01:00': 'Europe/Paris',
+  'UTC+02:00': 'Europe/Berlin',
+  'UTC+03:00': 'Europe/Moscow',
+  'UTC+04:00': 'Asia/Dubai',
+  'UTC+05:00': 'Asia/Karachi',
+  'UTC+06:00': 'Asia/Almaty',
+  'UTC+07:00': 'Asia/Bangkok',
+  'UTC+08:00': 'Asia/Singapore',
+  'UTC+09:00': 'Asia/Tokyo',
+  'UTC+10:00': 'Australia/Sydney',
+  'UTC+11:00': 'Pacific/Noumea',
+  'UTC+12:00': 'Pacific/Fiji'
+};
+
+// Función para convertir las zonas horarias UTC a las zonas horarias estándar
+const convertUTCToTimezones = (utcZone) => {
+  return utcToTimezonesMap[utcZone] || null;
+};
 
 
 // *****************POST para crear un nuevo país*****************************************
 app.post('/add-country', [
+
+  body('name.common')
+    .notEmpty().withMessage('El nombre común es obligatorio')
+    .isString().withMessage('El nombre común debe ser una cadena de texto')
+    .isLength({ min: 3, max: 90 }).withMessage('El nombre común debe tener entre 3 y 90 caracteres'),
+
+
   body('name.official')
     .notEmpty().withMessage('El nombre oficial es obligatorio')
     .isString().withMessage('El nombre oficial debe ser una cadena de texto')
@@ -117,100 +165,103 @@ app.post('/add-country', [
     .trim()
     .isLength({ min: 3, max: 100 }).withMessage('El creador debe tener entre 3 y 100 caracteres'),
 
-    // Validación para el campo 'region'
+  // Validación para el campo 'region'
   body('region')
     .notEmpty().withMessage('La región es obligatoria')
     .isString().withMessage('La región debe ser una cadena de texto')
     .isLength({ min: 3, max: 100 }).withMessage('La región debe tener entre 3 y 100 caracteres'),
 
-  ], async (req, res) => {
+
+  // Validación para el campo 'gini'
+  body('gini')
+    .optional() // Hace que el campo sea opcional
+    .isFloat({ min: 0, max: 100 }).withMessage('El índice Gini debe estar entre 0 y 100')
+    .custom((value) => {
+      if (value && !/^\d+(\.\d{1,2})?$/.test(value)) {
+        throw new Error('El índice Gini debe ser un número con hasta dos decimales.');
+      }
+      return true;
+    }),
+
+  // Validación para el campo 'timezone'
+  body('timezones')
+    .isArray().withMessage('La zona horaria debe ser un array de cadenas de texto')
+    .custom((timezones) => {
+      return timezones.every(tz => typeof tz === 'string' && tz.match(/^[A-Za-z]+\/[A-Za-z_\-]+$/));
+    }),
+
+  // Validación para el campo 'borders'
+  body('borders')
+    .optional() // Hace que el campo sea opcional
+    .isArray().withMessage('Las fronteras deben ser un array de códigos de 3 letras')
+    .custom((borders) => {
+      return borders.every(border => /^[A-Z]{3}$/.test(border));
+    }).withMessage('Cada frontera debe ser un código de 3 letras mayúsculas')
+
+], async (req, res) => {
     console.log('Datos recibidos:', req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-  
-    try {
-      // Manejo inteligente de languages para soportar tanto string como array
-      let languages = req.body.languages;
-      if (typeof languages === 'string') {
-        // Si es string (caso Postman), hacer split
-        languages = languages.split(',').map(lang => lang.trim());
-      } else if (Array.isArray(languages)) {
-        // Si ya es array (caso frontend), usarlo directamente
-        languages = languages;
-      } else {
-        // Si no es ni string ni array, usar array vacío
-        languages = [];
-      }
-  
-      const newCountry = new Country({
-        name: {
-          common: req.body.name.common,
-          official: req.body.name.official
-        },
-        capital: req.body.capital,
-        area: req.body.area,
-        population: req.body.population,
-        languages: languages,
-        creator: req.body.creator || "Vilma Ponce",
-        region: req.body.region,
-        borders: req.body.borders || []
-      });
-  
-      await newCountry.save();
-      res.redirect('/api/countries');
-    } catch (error) {
-      console.error('Error al crear país:', error);
-      res.status(500).json({ error: 'Error al crear el país' });
-    }
-  });
 
-  // ], async (req, res) => {
-  //   console.log('Datos recibidos:', req.body);
-  //   const errors = validationResult(req);
-  //   if (!errors.isEmpty()) {
-  //     return res.status(400).json({ errors: errors.array() });
-  //   }
-  
-  //   try {
-  //     // Ya no necesitamos hacer split porque la validación requiere que sea un array
-  //     const languages = req.body.languages;
-  
-  //     const newCountry = new Country({
-  //       name: {
-  //         common: req.body.name.common,    // Agregado el nombre común
-  //         official: req.body.name.official
-  //       },
-  //       capital: req.body.capital,
-  //       area: req.body.area,
-  //       population: req.body.population,
-  //       languages: languages,              // Usamos el array directamente
-  //       creator: req.body.creator || "Vilma Ponce",
-  //       flag: req.body.flag || '',
-  //       region: req.body.region,
-  //       borders: req.body.borders || []
-  //     });
-  
-  //     console.log('País a guardar:', newCountry);
-    
-  //     await newCountry.save();
-      
-  //     return res.status(201).json({ 
-  //       success: true, 
-  //       message: 'País creado exitosamente',
-  //       data: newCountry
-  //     });
-       
-  //   } catch (error) {
-  //     console.error('Error al crear país:', error);
-  //     return res.status(500).json({ 
-  //       success: false,
-  //       error: 'Error al crear el país',
-  //       details: error.message 
-  //     });
-  //   }
-  // });
+  try {
+    // Manejo inteligente de languages para soportar tanto string como array
+    let languages = req.body.languages;
+    if (typeof languages === 'string') {
+      // Si es string (caso Postman), hacer split
+      languages = languages.split(',').map(lang => lang.trim());
+    } else if (Array.isArray(languages)) {
+      // Si ya es array (caso frontend), usarlo directamente
+      languages = languages;
+    } else {
+      // Si no es ni string ni array, usar array vacío
+      languages = [];
+    }
+
+    // Manejo de gini (si está presente)
+    let gini = req.body.gini || null; // Si no se pasa, se coloca null
+
+    // Manejo de timezone (si está presente)
+    let timezones = req.body.timezones;
+
+    if (typeof timezones === 'string') {
+      timezones = timezones.split(',').map(tz => tz.trim());
+    } else if (!Array.isArray(timezones)) {
+      timezones = [];
+    }
+
+
+    // Manejo de borders (si están presentes)
+    let borders = req.body.borders || [];
+
+
+    const newCountry = new Country({
+      name: {
+        common: req.body.name.common,
+        official: req.body.name.official
+      },
+      capital: req.body.capital,
+      area: req.body.area,
+      population: req.body.population,
+      languages: languages,
+      creator: req.body.creator || "Vilma Ponce",
+      region: req.body.region,
+      borders: borders,
+      gini: gini, // Añadir gini al nuevo país
+      timezones: timezones // Añadir timezone al nuevo país
+    });
+
+    await newCountry.save();
+    res.redirect('/api/countries');
+  } catch (error) {
+    console.error('Error al crear país:', error);
+    res.status(500).json({
+      mensaje: 'Error interno del servidor',
+      error: error.message || 'No se pudo guardar el país debido a un error desconocido'
+    });
+  }
+});
 
 
 // Ruta para editar un país
@@ -228,6 +279,9 @@ app.get('/countries/editar/:id', async (req, res) => {
     }
 
     country.languages = country.languages || [];
+    country.gini = country.gini || null;
+    country.timezones = country.timezones || [];
+    country.borders = country.borders || [];
 
     res.render('editar-pais', { country });
   } catch (err) {
@@ -246,14 +300,17 @@ app.post('/countries/editar/:id', async (req, res) => {
 
   try {
 
-  
-    const { nameCommon, capital, languages } = req.body;
-      console.log(req.body);
-        // Verifica el contenido de la solicitud
+
+    const { nameCommon, capital, languages, gini, timezones, borders, creator } = req.body;
+    console.log(req.body);
+    // Verifica el contenido de la solicitud
     const country = await Country.findByIdAndUpdate(id, {
       nameCommon,
       capital,
       languages,
+      gini,
+      timezones,
+      borders,
       creator
     });
 
@@ -272,7 +329,7 @@ app.post('/countries/editar/:id', async (req, res) => {
 // Ruta para actualizar un país
 app.put('/countries/editar/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, capital, area, population, languages, region, creator } = req.body;
+  const { name, capital, area, population, languages, region, gini, timezones, borders, creator } = req.body;
 
   // Verificar si hay errores de validación
   const errors = validationResult(req);
@@ -288,8 +345,11 @@ app.put('/countries/editar/:id', async (req, res) => {
       population,
       languages,
       region,
-      creator 
-      
+      gini,
+      timezones,
+      borders,
+      creator
+
     }, { new: true });
 
     if (!updatedCountry) {
@@ -300,7 +360,7 @@ app.put('/countries/editar/:id', async (req, res) => {
   } catch (error) {
     res.status(500).send('Error al actualizar el país');
   }
-  
+
 });
 
 // Ruta para eliminar un país

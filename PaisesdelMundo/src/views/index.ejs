@@ -8,6 +8,7 @@
   <title>
     <%= title %>
   </title>
+  
 </head>
 
 <body>
@@ -20,6 +21,28 @@
         <p>Área: <%= country.area %> km²</p>
         <p>Población: <%= country.population %></p>
         <p>Idiomas: <%= country.languages ? Object.values(country.languages).join(', ') : 'No disponibles' %></p>
+        <p><strong>Índice de Gini:</strong> 
+          <% if (typeof country.gini === 'number') { %>
+            <%= country.gini %>%
+          <% } else if (country.gini && typeof country.gini === 'object') { %>
+            <% const lastGiniYear = Object.keys(country.gini).sort().pop() %>
+            <%= country.gini[lastGiniYear] ? country.gini[lastGiniYear] + '%' : 'No disponible' %>
+          <% } else { %>
+            No disponible
+          <% } %>
+        </p>
+    
+        <p><strong>Zona horaria:</strong> 
+          <%= country.timezones && country.timezones.length > 0 ? country.timezones.join(', ') : 'No disponible' %>
+        </p>
+    
+        <p><strong>Fronteras:</strong> 
+          <% if (country.borders && country.borders.length > 0) { %>
+            <%= country.borders.join(', ') %>
+          <% } else { %>
+            No tiene fronteras registradas
+          <% } %>
+        </p>
         <p>Bandera:
           <% if (country.flag && country.flag.includes('http')) { %>
             <img src="<%= country.flag %>" alt="Bandera de <%= country.name.common %>" style="width: 50px; height: auto;">
@@ -28,7 +51,7 @@
           <% } %>
         </p>
         <p>Creator: <%= country.creator %></p>
-
+        
         <!-- Botones de Edición y Eliminación -->
         <div>
           <a href="/countries/editar/<%= country._id %>" class="btn btn-primary"" style="padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
@@ -50,7 +73,7 @@
   <div id="display-container" style="margin-top: 20px; padding: 10px; border: 1px solid #007bff;">
     <!-- Los datos actualizados aparecerán aquí -->
   </div>
-
+  
 </body>
 
 </html>

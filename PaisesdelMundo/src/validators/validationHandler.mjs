@@ -1,6 +1,9 @@
 import { validationResult } from 'express-validator';
 
 export const validationHandler = (req, res, next) => {
+
+
+  
   // Obtener los resultados de la validación
   const errors = validationResult(req);
 
