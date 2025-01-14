@@ -155,11 +155,12 @@
              id="timezones" 
              name="timezones" 
              value="<%= country ? country.timezones : '' %>"
-             required placeholder="Ejemplo: America/New_York, Europe/Madrid"
+             required 
+             pattern="^UTC[+-]\d{2}:\d{2}$" 
+             placeholder="Ejemplo: UTC-05:00"
              onkeyup="validarCampo(this)"
              class="form-control">
       <div class="error-message" id="timezones-error"></div>
-    </div>
     
 
   
@@ -229,6 +230,7 @@
   .error-message.active {
     display: block;
   }
+  
   
   .btn {
     display: inline-block;
@@ -331,10 +333,10 @@
             break;
   
           case 'timezones':
-            const timezoneRegex = /^[A-Za-z]+\/[A-Za-z_]+$/;
+            const timezoneRegex = /^UTC[+-]\d{2}:\d{2}$/;
             if (!timezoneRegex.test(valor)) {
               esValido = false;
-              mensajeError = 'Formato de zona horaria no válido. Ejemplo: America/New_York.';
+              mensajeError = 'Debe estar en el formato UTC±HH:MM. Ejemplo: UTC-05:00.';
             }
             break;
   

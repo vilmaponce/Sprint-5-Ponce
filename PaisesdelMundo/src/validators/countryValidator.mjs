@@ -54,35 +54,23 @@ export const crearPaisValidation = [
     .notEmpty().withMessage('La población es obligatoria')
     .isInt({ min: 0 }).withMessage('La población debe ser un número entero mayor o igual a 0'),
 
-  // Para el Gini
+    // Para el Gini
   body('gini')
-    .optional()
-    .custom((value) => {
-      // Si es un número simple
-      if (typeof value === 'number') {
-        return true;
-      }
-      // Si es un objeto con años
-      if (typeof value === 'object' && value !== null) {
-        const validYears = Object.keys(value).every(year => 
-          /^\d{4}$/.test(year) && 
-          typeof value[year] === 'number' &&
-          value[year] >= 0 &&
-          value[year] <= 100
-        );
-        return validYears;
-      }
-      return false;
-    })
-    .withMessage('Gini debe ser un número entre 0 y 100 o un objeto con años y valores numéricos'),
-
+      .trim() // Eliminar espacios en blanco al principio y al final
+      .notEmpty().withMessage('El índice Gini no puede estar vacío.') // Validar que no esté vacío
+      .isFloat({ min: 0, max: 100, decimal_digits: '0,2' }) // Validar que sea un número entre 0 y 100 con hasta 2 decimales
+      .withMessage('El índice Gini debe ser un número entre 0 y 100, con hasta dos decimales.'),
+    
   // Para los timezones
-  body('timezones')  
-    .isArray({ min: 1 }).withMessage('Las zonas horarias deben ser un array de al menos un elemento.')
+  body('timezones')
+    .isArray().withMessage('La zona horaria debe ser un array de cadenas de texto')
     .custom((timezones) => {
-      return timezones.every(tz => typeof tz === 'string' && /^[A-Za-z]+\/[A-Za-z_\-]+$/.test(tz));
-    }).withMessage('Cada zona horaria debe ser una cadena de texto válida, como "America/New_York"'),
-
+      return timezones.every(tz => 
+        typeof tz === 'string' && 
+        tz.match(/^UTC[+-]\d{2}(:\d{2})?$/)  // Solo acepta el formato UTC±HH:MM o UTC±HH
+      );
+    })
+    .withMessage('Cada zona horaria debe tener el formato "UTC±HH:MM", por ejemplo, "UTC-06:00".'),
 
   // Validación para el área
   body('area')
@@ -158,28 +146,28 @@ export const actualizarPaisValidation = [
     .isInt({ min: 0 }).withMessage('La población debe ser un número entero mayor o igual a 0'),
 
   body('gini')
-    .optional()
-    .isNumeric().withMessage('Gini debe ser un número')
-    .custom((gini) => {
-      if (typeof gini === 'object') {
-        return Object.keys(gini).every(year => /^[0-9]{4}$/.test(year) && typeof gini[year] === 'number');
-      }
-      return typeof gini === 'number'; // Permitir solo un número
-    })
-    .withMessage('Gini debe ser un número o un objeto de años con valores numéricos'),
-  
+    .optional() // La validación es opcional si el campo Gini no se proporciona
+    .trim() // Eliminar espacios en blanco al principio y al final
+    .notEmpty().withMessage('El índice Gini no puede estar vacío.') // Validar que no esté vacío
+    .isFloat({ min: 0, max: 100, decimal_digits: '0,2' }) // Validar que sea un número entre 0 y 100 con hasta 2 decimales
+    .withMessage('El índice Gini debe ser un número entre 0 y 100, con hasta dos decimales.'),
 
 
-  // Validación para las zonas horarias
   body('timezones')
     .optional()
-    .isArray().withMessage('Las zonas horarias deben ser un array')
     .custom((timezones) => {
+      // Si es una cadena, la convierte en un array
+      if (typeof timezones === 'string') {
+        timezones = [timezones];
+      }
+      
+      // Validar que cada zona horaria sea una cadena válida con el formato UTC±hh:mm
       return timezones.every(timezone =>
-        typeof timezone === 'string' && /^[A-Za-z/_+-]+$/.test(timezone)
+        typeof timezone === 'string' && /^UTC[+-]\d{2}:\d{2}$/.test(timezone)
       );
-    }).withMessage('Cada zona horaria debe ser una cadena válida como "Europe/Madrid" o "UTC+1"'),
-
+    })
+    .withMessage('Cada zona horaria debe tener el formato "UTC±HH:MM", por ejemplo, "UTC-05:00".'),
+  
   // Validación para el área
   body('area')
     .optional()

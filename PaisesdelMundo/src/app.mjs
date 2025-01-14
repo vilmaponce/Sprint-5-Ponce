@@ -88,39 +88,6 @@ app.use((req, res, next) => {
 });
 
 
-// Mapeo entre las zonas horarias UTC y las zonas horarias estándar IANA
-const utcToTimezonesMap = {
-  'UTC-12:00': 'Pacific/Kwajalein',
-  'UTC-11:00': 'Pacific/Midway',
-  'UTC-10:00': 'Pacific/Honolulu',
-  'UTC-09:00': 'America/Anchorage',
-  'UTC-08:00': 'America/Los_Angeles',
-  'UTC-07:00': 'America/Denver',
-  'UTC-06:00': 'America/Chicago',
-  'UTC-05:00': 'America/New_York',
-  'UTC-04:00': 'America/Houston',
-  'UTC-03:00': 'America/Argentina/Buenos_Aires',
-  'UTC-02:00': 'America/Noronha',
-  'UTC-01:00': 'Atlantic/Azores',
-  'UTC+00:00': 'Europe/London',
-  'UTC+01:00': 'Europe/Paris',
-  'UTC+02:00': 'Europe/Berlin',
-  'UTC+03:00': 'Europe/Moscow',
-  'UTC+04:00': 'Asia/Dubai',
-  'UTC+05:00': 'Asia/Karachi',
-  'UTC+06:00': 'Asia/Almaty',
-  'UTC+07:00': 'Asia/Bangkok',
-  'UTC+08:00': 'Asia/Singapore',
-  'UTC+09:00': 'Asia/Tokyo',
-  'UTC+10:00': 'Australia/Sydney',
-  'UTC+11:00': 'Pacific/Noumea',
-  'UTC+12:00': 'Pacific/Fiji'
-};
-
-// Función para convertir las zonas horarias UTC a las zonas horarias estándar
-const convertUTCToTimezones = (utcZone) => {
-  return utcToTimezonesMap[utcZone] || null;
-};
 
 
 // *****************POST para crear un nuevo país*****************************************
@@ -183,12 +150,13 @@ app.post('/add-country', [
       return true;
     }),
 
-  // Validación para el campo 'timezone'
+    // Validación para el campo 'timezones' en la creación de un país
   body('timezones')
-    .isArray().withMessage('La zona horaria debe ser un array de cadenas de texto')
+    .optional() // Si es opcional
+    .isArray().withMessage('La zona horaria debe ser un array de cadenas de texto.')
     .custom((timezones) => {
-      return timezones.every(tz => typeof tz === 'string' && tz.match(/^[A-Za-z]+\/[A-Za-z_\-]+$/));
-    }),
+      return timezones.every(tz => typeof tz === 'string' && /^UTC[+-]\d{2}:\d{2}$/.test(tz));
+    }).withMessage('Cada zona horaria debe tener el formato "UTC±HH:MM", por ejemplo, "UTC-05:00".'),
 
   // Validación para el campo 'borders'
   body('borders')

@@ -31,7 +31,7 @@ document.getElementById('countryForm').addEventListener('submit', async function
             document.getElementById('timezones-error').textContent = ''; // Limpiar mensaje de error si es válido
         }
         
-        // Procesar valores de los campos (como lo hacías antes)
+        // Procesar valores de los campos 
         const capitals = capitalValue.split(',').map(item => item.trim()).filter(Boolean);
         const languages = languagesValue.split(',').map(item => item.trim()).filter(Boolean);
         const borders = bordersValue.split(',').map(item => item.trim()).filter(Boolean); // Procesar borders
@@ -49,9 +49,9 @@ document.getElementById('countryForm').addEventListener('submit', async function
             population: Number(formData.get('population')),
             languages: languages,
             creator: formData.get('creator'),
-            gini: parseFloat(giniValue),  // Incluir gini en el objeto
-            timezones: timezonesValue,  // Incluir timezone en el objeto
-            borders: borders  // Incluir borders en el objeto
+            gini: parseFloat(giniValue),  
+            timezones: timezonesValue,  
+            borders: borders  
         };
 
         console.log('Enviando datos:', data);

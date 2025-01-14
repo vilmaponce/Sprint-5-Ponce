@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Función para mostrar el modal con el contenido JSON
 function mostrarModal(contenido) {
-    // Aquí debes colocar el código para mostrar el modal con el contenido
+    // MODAL
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `

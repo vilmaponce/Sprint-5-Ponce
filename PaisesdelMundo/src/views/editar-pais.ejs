@@ -96,7 +96,7 @@
         <div class="form-group">
           <label for="gini">Índice Gini</label>
           <input type="number" id="gini" name="gini" value="<%= country ? country.gini : '' %>" required min="0"
-            max="100" step="0.1" onkeyup="validarCampo(this)" class="form-control">
+            max="100" step="0.01" onkeyup="validarCampo(this)" class="form-control">
           <div class="error-message" id="gini-error"></div>
         </div>
 
@@ -105,10 +105,11 @@
         <div class="form-group">
           <label for="timezones">Zona Horaria</label>
           <input type="text" id="timezones" name="timezones"
-            value="<%= country && country.timezones ? country.timezones.join(', ') : '' %>" required minlength="3"
-            maxlength="100" onkeyup="validarCampo(this)" class="form-control"
-            placeholder="Usa comas para múltiples zonas horarias">
-
+            value="<%= country && country.timezones ? country.timezones.join(', ') : '' %>" 
+            required pattern="^UTC[+-]\d{2}:\d{2}$" 
+            class="form-control"
+            placeholder="Ejemplo: UTC-05:00">
+        
           <div class="error-message" id="timezones-error"></div>
         </div>
 
@@ -179,6 +180,34 @@
     background-color: #0d6efd;
     border-color: #0d6efd;
   }
+
+
+  button {
+    padding: 10px 20px;
+    background-color: #007bff; /* Azul predeterminado */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  button:hover {
+    background-color: #0056b3; /* Azul más oscuro al pasar el cursor */
+    transform: scale(1.05); /* Ampliar ligeramente el botón */
+  }
+  
+  button:active {
+    background-color: #003d80; /* Azul aún más oscuro al hacer clic */
+    transform: scale(0.95); /* Reducir ligeramente al hacer clic */
+  }
+  
+  button:focus {
+    outline: none; /* Elimina el borde de enfoque predeterminado */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.8); /* Añade un efecto de foco */
+  }
+  
 </style>
 
 <script>
@@ -282,23 +311,23 @@
 
         case 'gini':
           const gini = parseFloat(valor);
+          // Verificar si el valor es un número válido
           if (isNaN(gini) || gini < 0 || gini > 100) {
             esValido = false;
-            mensajeError = 'Debe ser un número entre 0 y 100';
-          } else if (!/^\d+(\.\d{1,2})?$/.test(valor)) { // Solo hasta 2 decimales
+            mensajeError = 'Debe ser un número entre 0 y 100.';
+          }
+          // Verificar que el número tenga solo hasta 2 decimales
+          else if (!/^\d+(\.\d{1,2})?$/.test(valor)) {
             esValido = false;
-            mensajeError = 'El valor debe ser un número con hasta dos decimales';
+            mensajeError = 'El valor debe ser un número con hasta dos decimales.';
           }
           break;
 
 
         case 'timezones':
-          if (valor.length < 3 || valor.length > 100) {
+          if (!/^UTC[+-]\d{2}:\d{2}$/.test(valor)) {
             esValido = false;
-            mensajeError = 'Debe tener entre 3 y 100 caracteres';
-          } else if (!/^[a-zA-Z0-9_\-\/]+$/.test(valor)) { // Permitimos letras, números, guiones, barras
-            esValido = false;
-            mensajeError = 'Los husos horarios deben contener solo letras, números, guiones o barras';
+            mensajeError = 'Debe estar en el formato UTC±HH:MM (Ejemplo: UTC-05:00)';
           }
           break;
 
