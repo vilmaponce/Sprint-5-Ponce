@@ -80,7 +80,7 @@ const countrySchema = new mongoose.Schema({
     validate: {
       validator: function (value) {
         console.log("Datos antes de la validación:", value);
-        return Array.isArray(value) && value.every(tz => /^UTC[+-]\d{2}:\d{2}$/.test(tz));
+        return Array.isArray(value) && value.every(tz => typeof tz === 'string' && /^UTC[+\-]\d{2}(:\d{2})?$/.test(tz));
       },
       message: 'Cada zona horaria debe tener el formato "UTC±HH:MM", por ejemplo, "UTC-05:00".'
     }

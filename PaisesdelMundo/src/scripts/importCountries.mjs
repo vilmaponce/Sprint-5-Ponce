@@ -64,7 +64,7 @@ const importCountries = async () => {
       // Asegurarse de que las zonas horarias estén en el formato correcto
       let timezones = country.timezones ? country.timezones : ['No especificado'];
 
-      // Asegúrate de que las zonas horarias tengan el formato correcto
+      
       // Valida si las zonas horarias tienen el formato correcto
       const validTimezones = timezones.every(tz => /^[A-Za-z]+\/[A-Za-z_]+$/.test(tz));
 

@@ -1,6 +1,6 @@
 document.getElementById('countryForm').addEventListener('submit', async function (event) {
     event.preventDefault();
-    
+
     try {
         // Obtener valores de los campos
         const capitalValue = document.getElementById('capital').value;
@@ -11,14 +11,14 @@ document.getElementById('countryForm').addEventListener('submit', async function
 
         // Validación de zona horaria
         const timezones = timezonesValue.split(',').map(tz => tz.trim()); // Dividir por comas y eliminar espacios extra
-        const timezonePattern = /^[A-Za-z]+\/[A-Za-z_\-]+$|^UTC[+\-]\d{1,2}$/; // Asegura formato adecuado
+        const timezonePattern = /^UTC[+-][0-9]{2}:[0-9]{2}$/; // Expresión regular para validar la zona horaria
         let isValidTimezone = true;
         let timezoneErrorMessage = '';
 
         for (let timezone of timezones) {
             if (!timezonePattern.test(timezone)) {
                 isValidTimezone = false;
-                timezoneErrorMessage = 'Formato de zona horaria no válido. Ejemplo: "America/New_York" o "UTC+1".';
+                timezoneErrorMessage = 'Formato de zona horaria no válido. Debe ser algo como "UTC+01:00" o "UTC-05:00".';
                 break;
             }
         }
@@ -30,12 +30,14 @@ document.getElementById('countryForm').addEventListener('submit', async function
         } else {
             document.getElementById('timezones-error').textContent = ''; // Limpiar mensaje de error si es válido
         }
-        
+
+        // Continuar con el procesamiento del formulario...
+
         // Procesar valores de los campos 
         const capitals = capitalValue.split(',').map(item => item.trim()).filter(Boolean);
         const languages = languagesValue.split(',').map(item => item.trim()).filter(Boolean);
         const borders = bordersValue.split(',').map(item => item.trim()).filter(Boolean); // Procesar borders
-        
+
         // Crear el objeto de datos que se enviará al servidor
         const formData = new FormData(event.target);
         const data = {
@@ -49,9 +51,9 @@ document.getElementById('countryForm').addEventListener('submit', async function
             population: Number(formData.get('population')),
             languages: languages,
             creator: formData.get('creator'),
-            gini: parseFloat(giniValue),  
-            timezones: timezonesValue,  
-            borders: borders  
+            gini: parseFloat(giniValue),
+            timezones: timezonesValue,
+            borders: borders
         };
 
         console.log('Enviando datos:', data);
@@ -87,7 +89,7 @@ document.getElementById('countryForm').addEventListener('submit', async function
         }
 
         throw new Error(errorMessage);
-        
+
     } catch (error) {
         console.error('Error completo:', error);
         alert(error.message);

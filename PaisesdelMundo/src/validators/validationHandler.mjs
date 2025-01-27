@@ -9,6 +9,7 @@ export const validationHandler = (req, res, next) => {
 
   // Si hay errores de validación, se devuelven al cliente con un status 400
   if (!errors.isEmpty()) {
+    console.log('Errores de validación:', errors.array());
     return res.status(400).json({
       errors: errors.array(), // Devuelve los errores de validación como un array
     });

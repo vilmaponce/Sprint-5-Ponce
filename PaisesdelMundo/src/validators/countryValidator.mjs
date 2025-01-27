@@ -63,14 +63,15 @@ export const crearPaisValidation = [
     
   // Para los timezones
   body('timezones')
-    .isArray().withMessage('La zona horaria debe ser un array de cadenas de texto')
-    .custom((timezones) => {
-      return timezones.every(tz => 
-        typeof tz === 'string' && 
-        tz.match(/^UTC[+-]\d{2}(:\d{2})?$/)  // Solo acepta el formato UTC±HH:MM o UTC±HH
-      );
-    })
-    .withMessage('Cada zona horaria debe tener el formato "UTC±HH:MM", por ejemplo, "UTC-06:00".'),
+  .isArray().withMessage('La zona horaria debe ser un array de cadenas de texto')
+  .custom((timezones) => {
+    return timezones.every(tz => 
+      typeof tz === 'string' && 
+      tz.match(/^UTC[+-]\d{2}:\d{2}$/)  // Solo acepta el formato UTC±HH:MM
+    );
+  })
+  .withMessage('Cada zona horaria debe tener el formato "UTC±HH:MM", por ejemplo, "UTC-06:00".'),
+
 
   // Validación para el área
   body('area')

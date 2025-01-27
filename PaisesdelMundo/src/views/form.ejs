@@ -155,12 +155,12 @@
              id="timezones" 
              name="timezones" 
              value="<%= country ? country.timezones : '' %>"
-             required 
-             pattern="^UTC[+-]\d{2}:\d{2}$" 
+             required  
              placeholder="Ejemplo: UTC-05:00"
-             onkeyup="validarCampo(this)"
+             onkeyup="validarCampo(this)"  
              class="form-control">
-      <div class="error-message" id="timezones-error"></div>
+      <div class="error-message" id="timezones-error"></div>   <!-- Donde se mostrará el error -->
+    </div>
     
 
   
@@ -333,7 +333,7 @@
             break;
   
           case 'timezones':
-            const timezoneRegex = /^UTC[+-]\d{2}:\d{2}$/;
+            const timezoneRegex = /^UTC[+-][0-9]{2}:[0-9]{2}$/;
             if (!timezoneRegex.test(valor)) {
               esValido = false;
               mensajeError = 'Debe estar en el formato UTC±HH:MM. Ejemplo: UTC-05:00.';

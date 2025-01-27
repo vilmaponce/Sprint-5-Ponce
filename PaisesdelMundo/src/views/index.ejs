@@ -17,6 +17,7 @@
     <% countries.forEach(country => { %>
       <li>
         <h2><%= country.name.common %></h2>
+        <p><strong>Nombre oficial:</strong> <%= country.name.official %></p> 
         <p>Capital: <%= country.capital.join(', ') %></p>
         <p>Área: <%= country.area %> km²</p>
         <p>Población: <%= country.population %></p>

@@ -1,5 +1,5 @@
-import countryRepository from '../repositories/CountryRepository.mjs'; // Reemplazamos con el repositorio de países
-import Country from '../models/Country.mjs'; // Reemplazamos con el modelo de país
+import countryRepository from '../repositories/CountryRepository.mjs'; //repositorio de países
+import Country from '../models/Country.mjs'; // modelo de país
 
 // Obtener un país por su ID
 export async function obtenerPaisPorId(id) {

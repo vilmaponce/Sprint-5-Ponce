@@ -152,7 +152,6 @@ app.post('/add-country', [
 
     // Validación para el campo 'timezones' en la creación de un país
   body('timezones')
-    .optional() // Si es opcional
     .isArray().withMessage('La zona horaria debe ser un array de cadenas de texto.')
     .custom((timezones) => {
       return timezones.every(tz => typeof tz === 'string' && /^UTC[+-]\d{2}:\d{2}$/.test(tz));
@@ -170,10 +169,13 @@ app.post('/add-country', [
     console.log('Datos recibidos:', req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Errores de validación:', errors.array()); // Para revisar errores de validación
       return res.status(400).json({ errors: errors.array() });
     }
 
   try {
+
+    console.log('Datos antes de guardar el país:', req.body); // Ver qué datos vas a guardar
     // Manejo inteligente de languages para soportar tanto string como array
     let languages = req.body.languages;
     if (typeof languages === 'string') {
@@ -221,6 +223,7 @@ app.post('/add-country', [
     });
 
     await newCountry.save();
+    console.log('País guardado correctamente');
     res.redirect('/api/countries');
   } catch (error) {
     console.error('Error al crear país:', error);
@@ -354,6 +357,8 @@ app.delete('/:id', eliminarPaisValidation, (req, res, next) => {
     res.status(500).json({ error: 'Error al eliminar el país' });
   }
 });
+
+
 
 // Configuración de rutas API
 app.use('/api/countries', countryRoutes);
